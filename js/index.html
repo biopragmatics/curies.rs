@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>CURIEs dev</title>
+  </head>
+
+  <body>
+    <p>DOID:</p>
+    <p id="output"></p>
+
+    <script type="module">
+      import init, { Record, Converter } from "./pkg/web.js";
+
+      async function main() {
+        await init();
+        const rec1 = new Record("doid", "http://purl.obolibrary.org/obo/DOID_", [], []);
+        console.log(rec1);
+        // const rec2 = {
+        //   prefix: "doid",
+        //   uri_prefix: "http://purl.obolibrary.org/obo/DOID_",
+        //   prefix_synonyms: [],
+        //   uri_prefix_synonyms: [],
+        // };
+
+        const converter = new Converter();
+        converter.addRecord(rec1);
+        const uri = converter.expand("doid:1234");
+        console.log("ADDED")
+        console.log(uri);
+        document.getElementById("output").innerText = uri;
+      }
+      main();
+    </script>
+  </body>
+</html>

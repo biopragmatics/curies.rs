@@ -1,0 +1,19 @@
+[package]
+name = "curies"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+readme.workspace = true
+license-file.workspace = true
+keywords.workspace = true
+homepage.workspace = true
+categories.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+trie-rs = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+
+[package.metadata.docs.rs]
+all-features = true

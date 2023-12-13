@@ -1,0 +1,52 @@
+{
+  "version": "0.0.0",
+  "name": "@biopragmatics/curies",
+  "description": "JavaScript bindings for the curies library",
+  "license": "MIT",
+  "homepage": "https://github.com/biopragmatics/curies.rs",
+  "module": "web.js",
+  "types": "web.d.ts",
+  "collaborators": [
+    "Vincent Emonet <vincent.emonet@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/biopragmatics/curies.rs.git"
+  },
+  "files": [
+    "*.{js,wasm,d.ts}"
+  ],
+  "sideEffects": [
+    "./snippets/*"
+  ],
+  "scripts": {
+    "fmt": "prettier \"**/*.{ts,tsx,js,cjs,json,md,html}\" --ignore-path .gitignore --write",
+    "test": "wasm-pack build --debug --target nodejs && mocha",
+    "build": "rm -rf pkg pkg-web pkg-node && wasm-pack build --release --target web --out-name web && mv pkg pkg-web && wasm-pack build --release --target nodejs --out-name node && mv pkg pkg-node && node build_package.js && rm -r pkg-web pkg-node",
+    "start": "http-server ./",
+    "release": "npm run build && npm publish ./pkg --access public",
+    "pack": "npm run build && npm pack ./pkg"
+  },
+  "standard": {
+    "ignore": [
+      "pkg*"
+    ]
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "prettier": "^3.1.0"
+  },
+  "prettier": {
+    "trailingComma": "none",
+    "semi": false,
+    "tabWidth": 2,
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "arrowParens": "avoid",
+    "useTabs": false,
+    "printWidth": 120,
+    "pluginSearchDirs": [
+      "."
+    ]
+  }
+}

@@ -1,3 +1,5 @@
+use error::CuriesError;
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use trie_rs::{Trie, TrieBuilder};
@@ -6,12 +8,12 @@ use crate::error::DuplicateRecordError;
 pub mod error;
 
 /// A CURIE `Record`, containing its prefixes and URI prefixes
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Record {
-    prefix: String,
-    uri_prefix: String,
-    prefix_synonyms: HashSet<String>,
-    uri_prefix_synonyms: HashSet<String>,
+    pub prefix: String,
+    pub uri_prefix: String,
+    pub prefix_synonyms: HashSet<String>,
+    pub uri_prefix_synonyms: HashSet<String>,
     // TODO: pattern: Option<String>,
 }
 
@@ -65,8 +67,12 @@ impl Converter {
     // TODO: fn add_curie()
 
     /// Find corresponding CURIE `Record` given a prefix
-    pub fn find_by_prefix(&self, prefix: &str) -> Option<&Arc<Record>> {
-        self.prefix_map.get(prefix)
+    pub fn find_by_prefix(&self, prefix: &str) -> Result<&Arc<Record>, CuriesError> {
+        // Ok(self.prefix_map.get(prefix))
+        match self.prefix_map.get(prefix) {
+            Some(record) => Ok(record),
+            None => Err(CuriesError::NotFound(prefix.to_string())),
+        }
     }
 
     /// Find corresponding CURIE `Record` given a URI prefix
@@ -99,10 +105,10 @@ impl Converter {
     }
 
     /// Expands a CURIE to a URI
-    pub fn expand(&self, curie: &str) -> Option<String> {
+    pub fn expand(&self, curie: &str) -> Result<String, CuriesError> {
         let parts: Vec<&str> = curie.split(':').collect();
         if parts.len() != 2 {
-            return None;
+            return Err(CuriesError::InvalidCurie(curie.to_string()));
         }
         let (prefix, id) = (parts[0], parts[1]);
         self.find_by_prefix(prefix)
@@ -115,69 +121,6 @@ impl Default for Converter {
     fn default() -> Self {
         Self::new()
     }
-}
-
-#[test]
-fn main_tests() -> Result<(), Box<dyn std::error::Error>> {
-    let mut converter = Converter::new();
-
-    let record1 = Record {
-        prefix: "doid".to_string(),
-        uri_prefix: "http://purl.obolibrary.org/obo/DOID_".to_string(),
-        prefix_synonyms: HashSet::from(["DOID".to_string()]),
-        uri_prefix_synonyms: HashSet::from(["https://identifiers.org/DOID/"].map(String::from)),
-    };
-    let record2 = Record {
-        prefix: "obo".to_string(),
-        uri_prefix: "http://purl.obolibrary.org/obo/".to_string(),
-        prefix_synonyms: HashSet::from(["OBO".to_string()]),
-        uri_prefix_synonyms: HashSet::from(["https://identifiers.org/obo/"].map(String::from)),
-    };
-    converter.add_record(record1)?;
-    converter.add_record(record2)?;
-
-    // Find Record by prefix or URI
-    let curie = converter.find_by_prefix("doid").unwrap();
-    assert_eq!(curie.prefix, "doid");
-    println!("Found CURIE by prefix: {}", curie.prefix);
-
-    let curie = converter
-        .find_by_uri_prefix("http://purl.obolibrary.org/obo/DOID_")
-        .unwrap();
-    assert_eq!(curie.prefix, "doid");
-    println!("Found CURIE by URI prefix: {}", curie.prefix);
-
-    let curie = converter
-        .find_by_uri("http://purl.obolibrary.org/obo/DOID_1234")
-        .unwrap();
-    assert_eq!(curie.prefix, "doid");
-    println!("Found CURIE by URI: {}", curie.prefix);
-
-    // Test expansion of a primary CURIE prefix
-    let uri = converter.expand("doid:1234").unwrap();
-    println!("Expanded CURIE: {}", uri);
-    assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
-
-    // Test expansion of a secondary CURIE prefix (i.e., a synonym)
-    let uri = converter.expand("DOID:1234").unwrap();
-    println!("Expanded CURIE: {}", uri);
-    assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
-
-    // Test compression of a primary URI prefix
-    let curie = converter
-        .compress("http://purl.obolibrary.org/obo/DOID_1234")
-        .unwrap();
-    println!("Compressed URI: {}", curie);
-    assert_eq!(curie, "doid:1234");
-
-    // Test compression of a secondary URI prefix (i.e., synonym)
-    let curie = converter
-        .compress("https://identifiers.org/DOID/1234")
-        .unwrap();
-    println!("Compressed URI: {}", curie);
-    assert_eq!(curie, "doid:1234");
-
-    Ok(())
 }
 
 // Python API: https://github.com/cthoyt/curies/blob/main/src/curies/api.py#L1099

@@ -1,11 +1,19 @@
-[package]
-name = "curies"
+[workspace]
+resolver = "2"
+members = [
+    "lib",
+    "js",
+    # "python",
+]
+
+[workspace.package]
 version = "0.1.0"
 edition = "2021"
 description = "Idiomatic conversion between URIs and compact URIs (CURIEs)"
 readme = "README.md"
 license-file = "LICENSE"
 keywords = ["semantic web", "linked data", "linked open data"]
+categories = ["science", "encoding"]
 repository = "https://github.com/biopragmatics/curies.rs"
 homepage = "https://biopragmatics.github/curies.rs"
 authors = [
@@ -13,7 +21,5 @@ authors = [
   "Vincent Emonet <vincent.emonet@gmail.com>"
 ]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-trie-rs = "0.1"
+[profile.release]
+lto = true
