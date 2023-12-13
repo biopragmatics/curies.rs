@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2021"
 description = "Idiomatic conversion between URIs and compact URIs (CURIEs)"
 readme = "README.md"
-license = "MIT"
 license-file = "LICENSE"
 keywords = ["semantic web", "linked data", "linked open data"]
 repository = "https://github.com/biopragmatics/curies.rs"
 homepage = "https://biopragmatics.github/curies.rs"
 authors = [
   "Charles Tapley Hoyt <cthoyt@gmail.com>",
-  "Vincent Emonet"
+  "Vincent Emonet <vincent.emonet@gmail.com>"
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+trie-rs = "0.1"
