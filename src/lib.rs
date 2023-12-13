@@ -2,6 +2,9 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use trie_rs::{Trie, TrieBuilder};
 
+use crate::error::DuplicateRecordError;
+pub mod error;
+
 /// A CURIE `Record`, containing its prefixes and URI prefixes
 #[derive(Debug, Clone)]
 pub struct Record {
@@ -12,8 +15,8 @@ pub struct Record {
     // TODO: pattern: Option<String>,
 }
 
-/// A `Converter` is composed of 2 HashMaps (one for prefixes, one for namespaces),
-/// and a trie search to find the longest namespace
+/// A `Converter` is composed of 2 HashMaps (one for prefixes, one for URIs),
+/// and a trie search to find the longest URI
 pub struct Converter {
     prefix_map: HashMap<String, Arc<Record>>,
     uri_map: HashMap<String, Arc<Record>>,
@@ -34,10 +37,16 @@ impl Converter {
     }
 
     /// When adding a new CURIE we create a reference to the `Record` (Arc)
-    /// And we use this reference in the prefix and URI maps
-    pub fn add_record(&mut self, record: Record) {
+    /// And we use this reference in the prefix and URI hashmaps
+    pub fn add_record(&mut self, record: Record) -> Result<(), DuplicateRecordError> {
         let rec = Arc::new(record);
-        // TODO: check if synonyms are unique? Can be done easily with the `uri_map`
+        if self.prefix_map.contains_key(&rec.prefix) {
+            return Err(DuplicateRecordError(rec.prefix.clone()));
+        }
+        if self.uri_map.contains_key(&rec.uri_prefix) {
+            return Err(DuplicateRecordError(rec.uri_prefix.clone()));
+        }
+        // TODO: check if synonyms are unique?
 
         self.prefix_map.insert(rec.prefix.clone(), rec.clone());
         self.uri_map.insert(rec.uri_prefix.clone(), rec.clone());
@@ -50,6 +59,7 @@ impl Converter {
             self.trie_builder.push(uri_prefix);
         }
         self.trie = self.trie_builder.build();
+        Ok(())
     }
 
     // TODO: fn add_curie()
@@ -66,9 +76,12 @@ impl Converter {
 
     /// Find corresponding CURIE `Record` given a complete URI
     pub fn find_by_uri(&self, uri: &str) -> Option<&Arc<Record>> {
-        let ns_in_u8s = self.trie.common_prefix_search(uri);
-        let longest_ns = std::str::from_utf8(ns_in_u8s.last()?).unwrap();
-        self.find_by_uri_prefix(longest_ns)
+        let uri_in_u8s = self.trie.common_prefix_search(uri);
+        let longest_uri = match std::str::from_utf8(uri_in_u8s.last()?) {
+            Ok(valid_str) => valid_str,
+            Err(_) => return None, // If UTF-8 conversion fails, return None
+        };
+        self.find_by_uri_prefix(longest_uri)
     }
 
     /// Compresses a URI to a CURIE
@@ -105,7 +118,7 @@ impl Default for Converter {
 }
 
 #[test]
-fn main_tests() {
+fn main_tests() -> Result<(), Box<dyn std::error::Error>> {
     let mut converter = Converter::new();
 
     let record1 = Record {
@@ -113,7 +126,6 @@ fn main_tests() {
         uri_prefix: "http://purl.obolibrary.org/obo/DOID_".to_string(),
         prefix_synonyms: HashSet::from(["DOID".to_string()]),
         uri_prefix_synonyms: HashSet::from(["https://identifiers.org/DOID/"].map(String::from)),
-        // uri_prefix_synonyms: ["http://purl.obolibrary.org/obo/DOID_", "https://identifiers.org/DOID/"].iter().cloned().map(String::from).collect(),
     };
     let record2 = Record {
         prefix: "obo".to_string(),
@@ -121,25 +133,25 @@ fn main_tests() {
         prefix_synonyms: HashSet::from(["OBO".to_string()]),
         uri_prefix_synonyms: HashSet::from(["https://identifiers.org/obo/"].map(String::from)),
     };
-    converter.add_record(record1);
-    converter.add_record(record2);
+    converter.add_record(record1)?;
+    converter.add_record(record2)?;
 
     // Find Record by prefix or URI
     let curie = converter.find_by_prefix("doid").unwrap();
     assert_eq!(curie.prefix, "doid");
-    println!("Found CURIE by prefix: {:?}", curie.prefix);
+    println!("Found CURIE by prefix: {}", curie.prefix);
 
     let curie = converter
         .find_by_uri_prefix("http://purl.obolibrary.org/obo/DOID_")
         .unwrap();
     assert_eq!(curie.prefix, "doid");
-    println!("Found CURIE by URI prefix: {:?}", curie.prefix);
+    println!("Found CURIE by URI prefix: {}", curie.prefix);
 
     let curie = converter
         .find_by_uri("http://purl.obolibrary.org/obo/DOID_1234")
         .unwrap();
     assert_eq!(curie.prefix, "doid");
-    println!("Found CURIE by URI: {:?}", curie.prefix);
+    println!("Found CURIE by URI: {}", curie.prefix);
 
     // Test expansion and compression
     let uri = converter.expand("doid:1234").unwrap();
@@ -151,9 +163,11 @@ fn main_tests() {
         .unwrap();
     println!("Compressed URI: {}", curie);
     assert_eq!(curie, "doid:1234");
+    Ok(())
 }
 
 // Python API: https://github.com/cthoyt/curies/blob/main/src/curies/api.py#L1099
+// HashSet lookup more efficient than Vec: O(1) vs O(n). But HashSet are not ordered, while Vec are ordered
 
 // /// Stores the prefix and local unique identifier
 // /// for a compact URI (CURIE)
