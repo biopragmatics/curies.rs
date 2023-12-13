@@ -153,16 +153,30 @@ fn main_tests() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(curie.prefix, "doid");
     println!("Found CURIE by URI: {}", curie.prefix);
 
-    // Test expansion and compression
+    // Test expansion of a primary CURIE prefix
     let uri = converter.expand("doid:1234").unwrap();
     println!("Expanded CURIE: {}", uri);
     assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
 
+    // Test expansion of a secondary CURIE prefix (i.e., a synonym)
+    let uri = converter.expand("DOID:1234").unwrap();
+    println!("Expanded CURIE: {}", uri);
+    assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
+
+    // Test compression of a primary URI prefix
     let curie = converter
         .compress("http://purl.obolibrary.org/obo/DOID_1234")
         .unwrap();
     println!("Compressed URI: {}", curie);
     assert_eq!(curie, "doid:1234");
+
+    // Test compression of a secondary URI prefix (i.e., synonym)
+    let curie = converter
+        .compress("https://identifiers.org/DOID/1234")
+        .unwrap();
+    println!("Compressed URI: {}", curie);
+    assert_eq!(curie, "doid:1234");
+
     Ok(())
 }
 
