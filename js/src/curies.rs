@@ -4,7 +4,6 @@ use curies::{error::DuplicateRecordError, Converter, Record};
 use js_sys::{Promise, JSON};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::future_to_promise;
 
 #[wasm_bindgen(js_name = Record )]
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -77,6 +76,12 @@ impl ConverterJs {
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
+    pub fn compress(&self, uri: String) -> Result<String, JsValue> {
+        self.converter
+            .compress(&uri)
+            .map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+
     // #[wasm_bindgen(js_name = prefixMap)]
     // pub fn prefix_map(&self) -> Result<JsValue, JsValue> {
     //     serde_wasm_bindgen::to_value(&self.converter).map_err(|e| e.into())
@@ -88,7 +93,7 @@ impl ConverterJs {
     // }
 }
 
-// impl Into<JsValue> for NanopubJs {
+// impl Into<JsValue> for RecordJs {
 //     fn into(self) -> JsValue {
 //         // JsValue::from_serde(&self).unwrap()
 //         self.to_js()

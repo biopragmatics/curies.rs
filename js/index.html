@@ -7,7 +7,8 @@
 
   <body>
     <p>DOID:</p>
-    <p id="output"></p>
+    <p id="compressed"></p>
+    <p id="expanded"></p>
 
     <script type="module">
       import init, { Record, Converter } from "./pkg/web.js";
@@ -16,6 +17,7 @@
         await init();
         const rec1 = new Record("doid", "http://purl.obolibrary.org/obo/DOID_", [], []);
         console.log(rec1);
+
         // const rec2 = {
         //   prefix: "doid",
         //   uri_prefix: "http://purl.obolibrary.org/obo/DOID_",
@@ -25,10 +27,11 @@
 
         const converter = new Converter();
         converter.addRecord(rec1);
-        const uri = converter.expand("doid:1234");
-        console.log("ADDED")
-        console.log(uri);
-        document.getElementById("output").innerText = uri;
+
+        const compressedUri = converter.compress("http://purl.obolibrary.org/obo/DOID_");
+        const expandedUri = converter.expand("doid:1234");
+        document.getElementById("compressed").innerText = compressedUri;
+        document.getElementById("expanded").innerText = expandedUri;
       }
       main();
     </script>

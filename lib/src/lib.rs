@@ -68,7 +68,6 @@ impl Converter {
 
     /// Find corresponding CURIE `Record` given a prefix
     pub fn find_by_prefix(&self, prefix: &str) -> Result<&Arc<Record>, CuriesError> {
-        // Ok(self.prefix_map.get(prefix))
         match self.prefix_map.get(prefix) {
             Some(record) => Ok(record),
             None => Err(CuriesError::NotFound(prefix.to_string())),
@@ -76,32 +75,38 @@ impl Converter {
     }
 
     /// Find corresponding CURIE `Record` given a URI prefix
-    pub fn find_by_uri_prefix(&self, uri_prefix: &str) -> Option<&Arc<Record>> {
-        self.uri_map.get(uri_prefix)
+    pub fn find_by_uri_prefix(&self, uri_prefix: &str) -> Result<&Arc<Record>, CuriesError> {
+        match self.uri_map.get(uri_prefix) {
+            Some(record) => Ok(record),
+            None => Err(CuriesError::NotFound(uri_prefix.to_string())),
+        }
     }
 
     /// Find corresponding CURIE `Record` given a complete URI
-    pub fn find_by_uri(&self, uri: &str) -> Option<&Arc<Record>> {
-        let uri_in_u8s = self.trie.common_prefix_search(uri);
-        let longest_uri = match std::str::from_utf8(uri_in_u8s.last()?) {
-            Ok(valid_str) => valid_str,
-            Err(_) => return None, // If UTF-8 conversion fails, return None
+    pub fn find_by_uri(&self, uri: &str) -> Result<&Arc<Record>, CuriesError> {
+        let matching_uris = self.trie.common_prefix_search(uri);
+        let utf8_uri = match matching_uris.last() {
+            Some(u) => Ok(u),
+            None => Err(CuriesError::NotFound(uri.to_string())),
         };
-        self.find_by_uri_prefix(longest_uri)
+        self.find_by_uri_prefix(std::str::from_utf8(utf8_uri?)?)
     }
 
     /// Compresses a URI to a CURIE
-    pub fn compress(&self, uri: &str) -> Option<String> {
-        self.find_by_uri(uri).and_then(|record| {
-            let prefix = &record.prefix;
-            let id = uri.strip_prefix(&record.uri_prefix).or_else(|| {
+    pub fn compress(&self, uri: &str) -> Result<String, CuriesError> {
+        let record = self.find_by_uri(uri)?;
+        // Check for main prefix, if not match check in synonyms
+        let id = uri
+            .strip_prefix(&record.uri_prefix)
+            .or_else(|| {
                 record
                     .uri_prefix_synonyms
                     .iter()
                     .find_map(|synonym| uri.strip_prefix(synonym))
-            })?;
-            Some(format!("{}:{}", prefix, id))
-        })
+            })
+            .ok_or_else(|| CuriesError::NotFound(uri.to_string()))?;
+
+        Ok(format!("{}:{}", &record.prefix, id))
     }
 
     /// Expands a CURIE to a URI
@@ -124,7 +129,8 @@ impl Default for Converter {
 }
 
 // Python API: https://github.com/cthoyt/curies/blob/main/src/curies/api.py#L1099
-// HashSet lookup more efficient than Vec: O(1) vs O(n). But HashSet are not ordered, while Vec are ordered
+// HashSet more efficient than Vec: https://stackoverflow.com/questions/3185226/huge-performance-difference-between-vector-and-hashset
+// But HashSet are not ordered, while Vec are ordered
 
 // /// Stores the prefix and local unique identifier
 // /// for a compact URI (CURIE)

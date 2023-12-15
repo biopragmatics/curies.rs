@@ -1,5 +1,5 @@
 use curies::{Converter, Record};
-use std::{collections::HashSet, error::Error, fs};
+use std::collections::HashSet;
 
 #[test]
 fn main_tests() -> Result<(), Box<dyn std::error::Error>> {
@@ -21,30 +21,27 @@ fn main_tests() -> Result<(), Box<dyn std::error::Error>> {
     converter.add_record(record2)?;
 
     // Find Record by prefix or URI
-    let curie = converter.find_by_prefix("doid").unwrap();
+    let curie = converter.find_by_prefix("doid")?;
     assert_eq!(curie.prefix, "doid");
     println!("Found CURIE by prefix: {}", curie.prefix);
 
     let curie = converter
-        .find_by_uri_prefix("http://purl.obolibrary.org/obo/DOID_")
-        .unwrap();
+        .find_by_uri_prefix("http://purl.obolibrary.org/obo/DOID_")?;
     assert_eq!(curie.prefix, "doid");
     println!("Found CURIE by URI prefix: {}", curie.prefix);
 
     let curie = converter
-        .find_by_uri("http://purl.obolibrary.org/obo/DOID_1234")
-        .unwrap();
+        .find_by_uri("http://purl.obolibrary.org/obo/DOID_1234")?;
     assert_eq!(curie.prefix, "doid");
     println!("Found CURIE by URI: {}", curie.prefix);
 
     // Test expansion and compression
-    let uri = converter.expand("doid:1234").unwrap();
+    let uri = converter.expand("doid:1234")?;
     println!("Expanded CURIE: {}", uri);
     assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
 
     let curie = converter
-        .compress("http://purl.obolibrary.org/obo/DOID_1234")
-        .unwrap();
+        .compress("http://purl.obolibrary.org/obo/DOID_1234")?;
     println!("Compressed URI: {}", curie);
     assert_eq!(curie, "doid:1234");
     Ok(())
