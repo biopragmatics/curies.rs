@@ -41,12 +41,18 @@ cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish
 
 Run tests and display prints:
 
-```bash
+```shell
 cargo test -- --nocapture
 ```
 
 ### 🧹 Format
 
-```bash
+```shell
 cargo fmt
+```
+
+### Documentation
+
+```shell
+cargo doc --open
 ```
