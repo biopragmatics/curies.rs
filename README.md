@@ -15,16 +15,16 @@
     <a href="https://github.com/biopragmatics/curies.rs/blob/main/LICENSE">
         <img alt="MIT license" src="https://img.shields.io/badge/License-MIT-brightgreen.svg" />
     </a>
-    <!-- a href="https://codecov.io/gh/biopragmatics/curies.rs/branch/main">
+    <a href="https://codecov.io/gh/biopragmatics/curies.rs/branch/main">
         <img src="https://codecov.io/gh/biopragmatics/curies.rs/branch/main/graph/badge.svg" alt="Codecov status" />
-    </a -->
+    </a>
 </p>
 
 Idiomatic conversion between URIs and compact URIs (CURIEs) in Rust.
 
 ## 📥 Install dependencies
 
-[Rust](https://www.rust-lang.org/tools/install) is required for development.
+[Rust](https://www.rust-lang.org/tools/install), python 3.8+ and npm are required for development.
 
 ```bash
 rustup update

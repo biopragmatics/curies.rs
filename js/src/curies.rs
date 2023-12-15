@@ -27,7 +27,6 @@ impl RecordJs {
     ) -> Result<RecordJs, JsValue> {
         let prefix_synonyms_set: HashSet<String> = prefix_synonyms.into_iter().collect();
         let uri_prefix_synonyms_set: HashSet<String> = uri_prefix_synonyms.into_iter().collect();
-
         Ok(Self {
             prefix,
             uri_prefix,

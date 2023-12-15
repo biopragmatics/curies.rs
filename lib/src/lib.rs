@@ -22,6 +22,17 @@ pub struct Record {
     // TODO: pattern: Option<String>,
 }
 
+impl Record {
+    fn new(prefix: &str, uri_prefix: &str) -> Self {
+        Record {
+            prefix: prefix.to_string(),
+            uri_prefix: uri_prefix.to_string(),
+            prefix_synonyms: HashSet::from([]),
+            uri_prefix_synonyms: HashSet::from([]),
+        }
+    }
+}
+
 /// A `Converter` is composed of 2 HashMaps (one for prefixes, one for URIs),
 /// and a trie search to find the longest URI
 /// # Examples
@@ -55,6 +66,7 @@ pub struct Converter {
     trie_builder: TrieBuilder<u8>,
     trie: Trie<u8>,
     // TODO: pattern_map: HashMap<String, String>
+    // delimiter: char
 }
 
 impl Converter {
@@ -100,12 +112,7 @@ impl Converter {
     pub fn from_prefix_map(prefix_map: HashMap<String, String>) -> Result<Self, CuriesError> {
         let mut converter = Converter::default();
         for (prefix, uri_prefix) in prefix_map {
-            converter.add_record(Record {
-                prefix,
-                uri_prefix,
-                prefix_synonyms: HashSet::from([]),
-                uri_prefix_synonyms: HashSet::from([]),
-            })?;
+            converter.add_record(Record::new(&prefix, &uri_prefix))?;
         }
         Ok(converter)
     }
@@ -135,21 +142,11 @@ impl Converter {
             }
             match value {
                 Value::String(uri) => {
-                    converter.add_record(Record {
-                        prefix: key.clone(),
-                        uri_prefix: uri.clone(),
-                        prefix_synonyms: HashSet::from([]),
-                        uri_prefix_synonyms: HashSet::from([]),
-                    })?;
+                    converter.add_record(Record::new(key, uri))?;
                 }
                 Value::Object(map) if map.get("@prefix") == Some(&Value::Bool(true)) => {
                     if let Some(Value::String(uri)) = map.get("@id") {
-                        converter.add_record(Record {
-                            prefix: key.clone(),
-                            uri_prefix: uri.clone(),
-                            prefix_synonyms: HashSet::from([]),
-                            uri_prefix_synonyms: HashSet::from([]),
-                        })?;
+                        converter.add_record(Record::new(key, uri))?;
                     }
                 }
                 _ => continue,
@@ -314,11 +311,4 @@ impl DataSource for &Path {
 // pub struct Reference {
 //     prefix: String,
 //     identifier: String,
-// }
-
-// pub struct Record {
-//     curie_prefix: String,
-//     uri_prefix: String,
-//     curie_prefix_synonyms: Vec<String>,
-//     uri_prefix_synonyms: Vec<String>,
 // }
