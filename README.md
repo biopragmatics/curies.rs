@@ -34,7 +34,10 @@ cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish
 
 > If you are using VSCode we strongly recommend to install the `rust-lang.rust-analyzer` extension.
 
-## 🧪 Run tests
+
+## Development
+
+### 🧪 Run tests
 
 Run tests and display prints:
 
@@ -42,7 +45,7 @@ Run tests and display prints:
 cargo test -- --nocapture
 ```
 
-## 🧹 Format
+### 🧹 Format
 
 ```bash
 cargo fmt
