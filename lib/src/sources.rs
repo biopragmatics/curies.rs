@@ -40,6 +40,37 @@ pub async fn get_obo_converter() -> Result<Converter, CuriesError> {
 ///
 /// The Monarch Initiative context is a simple prefix map stored in a JSON-LD file.
 /// It contains a project-specific mix of prefixes from GO, OBO, and Identifiers.org.
+///
+/// Note, this is not a carefully constructed context, as there are overlapping entries
+/// such as:
+///
+/// - TrEMBL and `http://purl.uniprot.org/uniprot/`
+/// - SwissProt and `http://identifiers.org/SwissProt:`
+/// - UniProtKB" and `http://identifiers.org/uniprot/`
+///
+/// # Examples
+///
+/// ```rust
+/// use curies::sources::{get_monarch_converter};
+/// use tokio::{runtime};
+///
+/// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+/// let converter = rt.block_on(async {
+///      get_monarch_converter().await
+/// }).expect("Failed to create the GO converter");
+///
+/// let uri = converter.expand("CHEBI:24867").unwrap();
+/// assert_eq!(uri, "http://purl.obolibrary.org/obo/CHEBI_24867");
+///
+/// let unregistered_uri = converter.expand("addgene:50943");
+/// assert!(unregistered_uri.is_err(), "AddGene is not registered in the Monarch context");
+///
+/// let curie = converter.compress("http://purl.obolibrary.org/obo/CHEBI_24867").unwrap();
+/// assert_eq!(curie, "CHEBI:24867");
+///
+/// let unregistered_curie = converter.compress("http://addgene.org/50943");
+/// assert!(unregistered_curie.is_err(), "AddGene is not registered in the Monarch context");
+/// ```
 pub async fn get_monarch_converter() -> Result<Converter, CuriesError> {
     Converter::from_jsonld("https://raw.githubusercontent.com/prefixcommons/prefixcommons-py/master/prefixcommons/registry/monarch_context.jsonld").await
 }
@@ -51,12 +82,13 @@ pub async fn get_monarch_converter() -> Result<Converter, CuriesError> {
 /// It contains prefixes corresponding to semantic spaces that are useful for
 /// modeling the molecular functions, cellular components, and biological processes
 /// that genes take part in.
+///
 /// # Examples
 ///
 /// ```rust
 /// use curies::sources::{get_go_converter};
 /// use tokio::{runtime};
-/// 
+///
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let converter = rt.block_on(async {
 ///      get_go_converter().await
