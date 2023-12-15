@@ -12,8 +12,12 @@ use crate::{error::CuriesError, Converter};
 ///
 /// ```rust
 /// use curies::sources::{get_obo_converter};
+/// use tokio::{runtime};
 ///
-/// let converter = get_obo_converter();
+/// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+/// let converter = rt.block_on(async {
+///      get_obo_converter().await
+/// }).expect("Failed to create the OBO converter");
 ///
 /// let uri = converter.expand("DOID:1234")?;
 /// assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
