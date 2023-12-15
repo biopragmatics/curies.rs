@@ -11,7 +11,7 @@
     <p id="expanded"></p>
 
     <script type="module">
-      import init, { Record, Converter } from "./pkg/web.js";
+      import init, { Record, Converter, getOboConverter } from "./pkg/web.js";
 
       async function main() {
         await init();
@@ -25,11 +25,13 @@
         //   uri_prefix_synonyms: [],
         // };
 
-        const converter = new Converter();
-        converter.addRecord(rec1);
+        // const converter = new Converter();
+        // converter.addRecord(rec1);
 
-        const compressedUri = converter.compress("http://purl.obolibrary.org/obo/DOID_");
-        const expandedUri = converter.expand("doid:1234");
+        const converter = await getOboConverter();
+
+        const compressedUri = converter.compress("http://purl.obolibrary.org/obo/DOID_1234");
+        const expandedUri = converter.expand("DOID:1234");
         document.getElementById("compressed").innerText = compressedUri;
         document.getElementById("expanded").innerText = expandedUri;
       }

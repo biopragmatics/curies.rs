@@ -138,7 +138,7 @@ jobs:
           cache-dependency-path: '**/requirements.dev.txt'
       - run: pip install -r python/requirements.dev.txt
       - run: maturin build --release -m python/Cargo.toml
-      - run: pip install --no-index --find-links=target/wheels/ curies
+      - run: pip install --no-index --find-links=target/wheels/ curies-rs
       - run: rm -r target/wheels
       - run: maturin build --release --target universal2-apple-darwin -m python/Cargo.toml
       - run: maturin build --release -m python/Cargo.toml
@@ -170,7 +170,7 @@ jobs:
       - run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
       - run: pip install -r python/requirements.dev.txt
       - run: maturin build --release -m python/Cargo.toml
-      - run: pip install --no-index --find-links=target/wheels/ curies
+      - run: pip install --no-index --find-links=target/wheels/ curies-rs
       - run: rm -r target/wheels
       - run: maturin build --release -m python/Cargo.toml
       - run: maturin sdist -m python/Cargo.toml

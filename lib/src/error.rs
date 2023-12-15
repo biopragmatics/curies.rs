@@ -2,8 +2,10 @@ use std::error::Error;
 use std::fmt;
 use std::str::Utf8Error;
 
+use serde::Deserialize;
+
 /// Enum of errors returned by this library
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub enum CuriesError {
     NotFound(String),
     InvalidCurie(String),

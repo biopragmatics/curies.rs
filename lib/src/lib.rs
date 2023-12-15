@@ -250,17 +250,18 @@ impl Default for Converter {
 }
 
 /// Trait to provide the data as URL, HashMap, string, or Path to file
-#[async_trait]
-pub trait DataSource {
+// FutureExt::shared
+#[async_trait(?Send)]
+pub trait DataSource: Send + Sync {
     async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError>;
 }
-#[async_trait]
+#[async_trait(?Send)]
 impl DataSource for HashMap<String, Value> {
     async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError> {
         Ok(self)
     }
 }
-#[async_trait]
+#[async_trait(?Send)]
 impl DataSource for HashMap<String, String> {
     async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError> {
         Ok(self
@@ -269,33 +270,31 @@ impl DataSource for HashMap<String, String> {
             .collect())
     }
 }
-#[async_trait]
+#[async_trait(?Send)]
 impl DataSource for &str {
     async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError> {
         if self.starts_with("https://") || self.starts_with("http://") || self.starts_with("ftp://")
         {
-            // Making an HTTP request
-            let res = reqwest::get(self).await?;
-            if res.status().is_success() {
-                return Ok(res.json().await?);
-            } else {
-                return Err(CuriesError::Reqwest(format!(
-                    "{}: {}",
-                    res.status(),
-                    res.text().await?
-                )));
-            }
+            // Get URL content with HTTP request
+            let client = reqwest::Client::new();
+            Ok(client
+                .get(self)
+                .header(reqwest::header::ACCEPT, "application/json")
+                .send()
+                .await?
+                .json()
+                .await?)
         } else {
             // Directly parsing the provided string as JSON
             Ok(serde_json::from_str(self)?)
         }
     }
 }
-#[async_trait]
+#[async_trait(?Send)]
 impl DataSource for &Path {
     async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError> {
         if self.exists() {
-            // Reading from a file path
+            // Read from a file path
             let mut file = File::open(self)?;
             let mut contents = String::new();
             file.read_to_string(&mut contents)?;

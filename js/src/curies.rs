@@ -1,9 +1,10 @@
 use std::collections::HashSet;
 
-use curies::{Converter, Record};
-// use js_sys::{Promise, JSON};
+use curies::{sources::get_obo_converter, Converter, Record};
+use js_sys::Promise;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::future_to_promise;
 
 #[wasm_bindgen(js_name = Record )]
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -84,13 +85,21 @@ impl ConverterJs {
 
     // #[wasm_bindgen(js_name = prefixMap)]
     // pub fn prefix_map(&self) -> Result<JsValue, JsValue> {
-    //     serde_wasm_bindgen::to_value(&self.converter).map_err(|e| e.into())
+    //     serde_wasm_bindgen::to_value(&self.converter.prefix_map).map_err(|e| e.into())
     // }
+}
 
-    // #[wasm_bindgen(js_name = toString)]
-    // pub fn to_string(&self) -> String {
-    //     self.converter.to_string()
-    // }
+/// Get OBO converter
+#[wasm_bindgen(js_name = getOboConverter)]
+pub fn get_obo_converter_js() -> Promise {
+    future_to_promise(async move {
+        match get_obo_converter().await {
+            Ok(converter) => Ok(JsValue::from(ConverterJs { converter })),
+            Err(e) => Err(JsValue::from_str(&format!(
+                "Error getting OBO converter: {e}"
+            ))),
+        }
+    })
 }
 
 // impl Into<JsValue> for RecordJs {
