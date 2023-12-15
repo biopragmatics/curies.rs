@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use ::curies::{Converter, Record};
 use pyo3::{exceptions::PyException, prelude::*};
 use pythonize::pythonize;
