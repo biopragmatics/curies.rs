@@ -4,8 +4,8 @@
 
 You can easily work with `curies` from Python.
 
-```admonish warn title="Work in progress"
-This package is a work in progress.
+```admonish warning title="Work in progress"
+This package is a work in progress. This documentation might not be always up-to-date.
 ```
 
 ## 📥️ Install
