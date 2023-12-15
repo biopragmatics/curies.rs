@@ -11,7 +11,7 @@ use crate::{error::CuriesError, Converter};
 /// # Examples
 ///
 /// ```rust
-/// use curies::{get_obo_converter};
+/// use curies::sources::{get_obo_converter};
 ///
 /// let converter = get_obo_converter();
 ///
@@ -47,7 +47,7 @@ pub async fn get_monarch_converter() -> Result<Converter, CuriesError> {
 /// # Examples
 ///
 /// ```rust
-/// use curies::{get_go_converter};
+/// use curies::sources::{get_go_converter};
 ///
 /// let converter = get_go_converter();
 ///
