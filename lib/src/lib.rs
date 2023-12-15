@@ -1,11 +1,16 @@
+use async_trait::async_trait;
 use error::CuriesError;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::{HashMap, HashSet};
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
 use std::sync::Arc;
 use trie_rs::{Trie, TrieBuilder};
 
-use crate::error::DuplicateRecordError;
 pub mod error;
+pub mod sources;
 
 /// A CURIE `Record`, containing its prefixes and URI prefixes
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -38,15 +43,67 @@ impl Converter {
         }
     }
 
-    /// When adding a new CURIE we create a reference to the `Record` (Arc)
+    /// Create a `Converter` from a prefix `HashMap`
+    pub fn from_prefix_map(prefix_map: HashMap<String, String>) -> Result<Self, CuriesError> {
+        let mut converter = Converter::default();
+        for (prefix, uri_prefix) in prefix_map {
+            converter.add_record(Record {
+                prefix,
+                uri_prefix,
+                prefix_synonyms: HashSet::from([]),
+                uri_prefix_synonyms: HashSet::from([]),
+            })?;
+        }
+        Ok(converter)
+    }
+
+    /// Create a `Converter` from a JSON-LD file context
+    pub async fn from_jsonld<T: DataSource>(data: T) -> Result<Self, CuriesError> {
+        let prefix_map = data.fetch().await?;
+        let mut converter = Converter::default();
+        let context = match prefix_map.get("@context") {
+            Some(Value::Object(map)) => map,
+            _ => return Err(CuriesError::InvalidFormat("JSON-LD".to_string())),
+        };
+        for (key, value) in context {
+            if key.starts_with('@') {
+                continue;
+            }
+            match value {
+                Value::String(uri) => {
+                    converter.add_record(Record {
+                        prefix: key.clone(),
+                        uri_prefix: uri.clone(),
+                        prefix_synonyms: HashSet::from([]),
+                        uri_prefix_synonyms: HashSet::from([]),
+                    })?;
+                }
+                Value::Object(map) if map.get("@prefix") == Some(&Value::Bool(true)) => {
+                    if let Some(Value::String(uri)) = map.get("@id") {
+                        converter.add_record(Record {
+                            prefix: key.clone(),
+                            uri_prefix: uri.clone(),
+                            prefix_synonyms: HashSet::from([]),
+                            uri_prefix_synonyms: HashSet::from([]),
+                        })?;
+                    }
+                }
+                _ => continue,
+            }
+        }
+        Ok(converter)
+    }
+
+    /// Add a `Record` to the `Converter`
+    /// When adding a new record we create a reference to the `Record` (Arc)
     /// And we use this reference in the prefix and URI hashmaps
-    pub fn add_record(&mut self, record: Record) -> Result<(), DuplicateRecordError> {
+    pub fn add_record(&mut self, record: Record) -> Result<(), CuriesError> {
         let rec = Arc::new(record);
         if self.prefix_map.contains_key(&rec.prefix) {
-            return Err(DuplicateRecordError(rec.prefix.clone()));
+            return Err(CuriesError::DuplicateRecord(rec.prefix.clone()));
         }
         if self.uri_map.contains_key(&rec.uri_prefix) {
-            return Err(DuplicateRecordError(rec.uri_prefix.clone()));
+            return Err(CuriesError::DuplicateRecord(rec.uri_prefix.clone()));
         }
         // TODO: check if synonyms are unique?
 
@@ -125,6 +182,60 @@ impl Converter {
 impl Default for Converter {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+
+/// Trait to provide the data as URL, HashMap, string, or Path to file
+#[async_trait]
+pub trait DataSource {
+    async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError>;
+}
+#[async_trait]
+impl DataSource for HashMap<String, Value> {
+    async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError> {
+        Ok(self)
+    }
+}
+#[async_trait]
+impl DataSource for HashMap<String, String> {
+    async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError> {
+        Ok(self
+            .into_iter()
+            .map(|(key, value)| (key, Value::String(value)))
+            .collect())
+    }
+}
+#[async_trait]
+impl DataSource for &str {
+    async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError> {
+        if self.starts_with("https://") || self.starts_with("http://") || self.starts_with("ftp://")
+        {
+            // Making an HTTP request
+            let res = reqwest::get(self).await?;
+            if res.status().is_success() {
+                return Ok(res.json().await?)
+            } else {
+                return Err(CuriesError::Reqwest(format!("{}: {}", res.status(), res.text().await?)))
+            }
+        } else {
+            // Directly parsing the provided string as JSON
+            Ok(serde_json::from_str(self)?)
+        }
+    }
+}
+#[async_trait]
+impl DataSource for &Path {
+    async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError> {
+        if self.exists() {
+            // Reading from a file path
+            let mut file = File::open(self)?;
+            let mut contents = String::new();
+            file.read_to_string(&mut contents)?;
+            Ok(serde_json::from_str(&contents)?)
+        } else {
+            return Err(CuriesError::NotFound(format!("{:?}", self.to_str())))
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use curies::{error::DuplicateRecordError, Converter, Record};
-use js_sys::{Promise, JSON};
+use curies::{Converter, Record};
+// use js_sys::{Promise, JSON};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
