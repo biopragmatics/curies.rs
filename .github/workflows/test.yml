@@ -50,34 +50,34 @@ jobs:
           fail_ci_if_error: false
       #     token: ${{secrets.CODECOV_TOKEN}}
 
-  # docs:
-  #   name: 📖 Update docs
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     pages: write
-  #     id-token: write
-  #   # Allow one concurrent deployment
-  #   concurrency:
-  #     group: "pages"
-  #     cancel-in-progress: true
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - run: bash ./scripts/docs-install.sh
+  docs:
+    name: 📖 Update docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Allow one concurrent deployment
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash ./scripts/docs-install.sh
 
-  #     - run: bash ./scripts/docs-build.sh
+      - run: bash ./scripts/docs-build.sh
 
-  #     - name: Setup Pages
-  #       uses: actions/configure-pages@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
 
-  #     - name: Upload artifact
-  #       uses: actions/upload-pages-artifact@v1
-  #       with:
-  #         path: './target/doc'
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: './target/doc'
 
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v2
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

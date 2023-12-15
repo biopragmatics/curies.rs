@@ -1,3 +1,4 @@
+#![doc = include_str!("../docs/use_rust.md")]
 use async_trait::async_trait;
 use error::CuriesError;
 use serde::{Deserialize, Serialize};
