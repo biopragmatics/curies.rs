@@ -122,6 +122,9 @@ impl Converter {
     /// prefix_map.insert("DOID".to_string(), "http://purl.obolibrary.org/obo/DOID_".to_string());
     /// prefix_map.insert("OBO".to_string(), "http://purl.obolibrary.org/obo/".to_string());
     /// let converter = Converter::from_prefix_map(prefix_map).unwrap();
+    /// 
+    /// let curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234").unwrap();
+    /// assert_eq!(curie, "DOID:1234");
     /// ```
     pub fn from_prefix_map(prefix_map: HashMap<String, String>) -> Result<Self, CuriesError> {
         let mut converter = Converter::default();
