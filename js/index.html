@@ -15,20 +15,15 @@
 
       async function main() {
         await init();
-        const rec1 = new Record("doid", "http://purl.obolibrary.org/obo/DOID_", [], []);
-        console.log(rec1);
-
-        // const rec2 = {
-        //   prefix: "doid",
-        //   uri_prefix: "http://purl.obolibrary.org/obo/DOID_",
-        //   prefix_synonyms: [],
-        //   uri_prefix_synonyms: [],
-        // };
+        const rec1 = new Record("obo", "http://purl.obolibrary.org/obo/", [], []);
+        console.log(rec1.toString());
+        console.log(rec1.toJs());
 
         // const converter = new Converter();
         // converter.addRecord(rec1);
 
         const converter = await getOboConverter();
+        console.log(converter.toString())
 
         const compressedUri = converter.compress("http://purl.obolibrary.org/obo/DOID_1234");
         const expandedUri = converter.expand("DOID:1234");

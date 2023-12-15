@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 /// Python bindings
 #[pymodule]
-fn curies(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn curies_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add("__package__", "curies-rs")?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     m.add("__author__", env!("CARGO_PKG_AUTHORS").replace(':', "\n"))?;
@@ -20,22 +20,7 @@ fn curies(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 // #[pyclass(extends=Record, name = "Record", module = "curies_rs")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecordPy {
-    prefix: String,
-    uri_prefix: String,
-    prefix_synonyms: HashSet<String>,
-    uri_prefix_synonyms: HashSet<String>,
-}
-
-impl RecordPy {
-    #[allow(clippy::wrong_self_convention)]
-    fn into_record(&self) -> Record {
-        Record {
-            prefix: self.prefix.clone(),
-            uri_prefix: self.uri_prefix.clone(),
-            prefix_synonyms: self.prefix_synonyms.clone(),
-            uri_prefix_synonyms: self.uri_prefix_synonyms.clone(),
-        }
-    }
+    record: Record,
 }
 
 #[pymethods]
@@ -49,17 +34,19 @@ impl RecordPy {
         uri_prefix_synonyms: Vec<String>,
     ) -> PyResult<Self> {
         Ok(Self {
-            prefix,
-            uri_prefix,
-            prefix_synonyms: prefix_synonyms.into_iter().collect(),
-            uri_prefix_synonyms: uri_prefix_synonyms.into_iter().collect(),
+            record: Record {
+                prefix,
+                uri_prefix,
+                prefix_synonyms: prefix_synonyms.into_iter().collect(),
+                uri_prefix_synonyms: uri_prefix_synonyms.into_iter().collect(),
+            },
         })
     }
 
     // Return the Record as a python dictionary
     #[pyo3(text_signature = "($self)")]
     fn dict(&self, py: Python<'_>) -> PyResult<PyObject> {
-        pythonize(py, &self).map_err(|e| {
+        pythonize(py, &self.record).map_err(|e| {
             PyErr::new::<PyException, _>(format!("Error converting struct Record to dict: {e}"))
         })
     }
@@ -85,15 +72,15 @@ impl ConverterPy {
     }
 
     #[pyo3(text_signature = "($self, record)")]
-    fn add_record(&mut self, record: &RecordPy) -> PyResult<()> {
+    fn add_record(&mut self, record: RecordPy) -> PyResult<()> {
         self.converter
-            .add_record(record.into_record())
-            .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
+            .add_record(record.record)
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
     }
 
     fn compress(&self, uri: String) -> PyResult<String> {
         self.converter
             .compress(&uri)
-            .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
     }
 }

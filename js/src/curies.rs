@@ -3,19 +3,17 @@ use std::collections::HashSet;
 use curies::{sources::get_obo_converter, Converter, Record};
 use js_sys::Promise;
 use serde::{Deserialize, Serialize};
+use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::future_to_promise;
 
 #[wasm_bindgen(js_name = Record )]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecordJs {
-    // record: Record,
-    prefix: String,
-    uri_prefix: String,
-    prefix_synonyms: HashSet<String>,
-    uri_prefix_synonyms: HashSet<String>,
+    record: Record,
 }
 
+#[allow(clippy::inherent_to_string, clippy::wrong_self_convention)]
 #[wasm_bindgen(js_class = Record)]
 impl RecordJs {
     #[wasm_bindgen(constructor)]
@@ -28,20 +26,23 @@ impl RecordJs {
         let prefix_synonyms_set: HashSet<String> = prefix_synonyms.into_iter().collect();
         let uri_prefix_synonyms_set: HashSet<String> = uri_prefix_synonyms.into_iter().collect();
         Ok(Self {
-            prefix,
-            uri_prefix,
-            prefix_synonyms: prefix_synonyms_set,
-            uri_prefix_synonyms: uri_prefix_synonyms_set,
+            record: Record {
+                prefix,
+                uri_prefix,
+                prefix_synonyms: prefix_synonyms_set,
+                uri_prefix_synonyms: uri_prefix_synonyms_set,
+            },
         })
     }
 
-    fn into_record(self) -> Record {
-        Record {
-            prefix: self.prefix,
-            uri_prefix: self.uri_prefix,
-            prefix_synonyms: self.prefix_synonyms,
-            uri_prefix_synonyms: self.uri_prefix_synonyms,
-        }
+    #[wasm_bindgen(js_name = toJs)]
+    pub fn to_js(&self) -> Result<JsValue, JsValue> {
+        to_value(&self.record).map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.record.to_string()
     }
 }
 
@@ -65,7 +66,7 @@ impl ConverterJs {
     #[wasm_bindgen(js_name = addRecord)]
     pub fn add_record(&mut self, record: RecordJs) -> Result<(), JsValue> {
         self.converter
-            .add_record(record.into_record())
+            .add_record(record.record)
             .map(|_| ())
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
@@ -80,6 +81,11 @@ impl ConverterJs {
         self.converter
             .compress(&uri)
             .map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.converter.to_string()
     }
 
     // #[wasm_bindgen(js_name = prefixMap)]

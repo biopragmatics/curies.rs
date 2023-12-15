@@ -3,6 +3,7 @@ use error::CuriesError;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
+use std::fmt;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
@@ -30,6 +31,16 @@ impl Record {
             prefix_synonyms: HashSet::from([]),
             uri_prefix_synonyms: HashSet::from([]),
         }
+    }
+}
+
+impl fmt::Display for Record {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Prefix: {}", self.prefix)?;
+        writeln!(f, "URI prefix: {}", self.uri_prefix)?;
+        writeln!(f, "Prefix synonyms: {:?}", self.prefix_synonyms)?;
+        writeln!(f, "URI prefix synonyms: {:?}", self.uri_prefix_synonyms)?;
+        Ok(())
     }
 }
 
@@ -61,6 +72,7 @@ impl Record {
 /// use_converter().unwrap();
 /// ```
 pub struct Converter {
+    records: Vec<Arc<Record>>,
     prefix_map: HashMap<String, Arc<Record>>,
     uri_map: HashMap<String, Arc<Record>>,
     trie_builder: TrieBuilder<u8>,
@@ -89,6 +101,7 @@ impl Converter {
     /// ```
     pub fn new() -> Self {
         Converter {
+            records: Vec::new(),
             prefix_map: HashMap::new(),
             uri_map: HashMap::new(),
             trie_builder: TrieBuilder::new(),
@@ -168,6 +181,7 @@ impl Converter {
         }
         // TODO: check if synonyms are unique?
 
+        self.records.push(rec.clone());
         self.prefix_map.insert(rec.prefix.clone(), rec.clone());
         self.uri_map.insert(rec.uri_prefix.clone(), rec.clone());
         self.trie_builder.push(&rec.uri_prefix);
@@ -243,6 +257,13 @@ impl Converter {
 impl Default for Converter {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl fmt::Display for Converter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Converter contains {} records", self.records.len())?;
+        Ok(())
     }
 }
 
