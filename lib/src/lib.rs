@@ -25,7 +25,7 @@ pub struct Record {
 }
 
 impl Record {
-    fn new(prefix: &str, uri_prefix: &str) -> Self {
+    pub fn new(prefix: &str, uri_prefix: &str) -> Self {
         Record {
             prefix: prefix.to_string(),
             uri_prefix: uri_prefix.to_string(),

@@ -5,7 +5,10 @@
 You can use the Rust crate to work with CURIEs:
 
 ```rust
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+use curies::{Converter, Record};
+use std::collections::HashSet;
+
+fn example() -> Result<(), Box<dyn std::error::Error>> {
     let mut converter = Converter::new();
 
     let record1 = Record {
@@ -25,7 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Compressed URI: {}", curie);
     Ok(())
 }
-main()
+example().unwrap();
 ```
 
 ## 📖 API reference
