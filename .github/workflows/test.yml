@@ -1,0 +1,82 @@
+
+name: Tests
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  clippy:
+    name: 📎 fmt and clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update
+      - run: rustup component add clippy rustfmt
+      - run: cargo fmt -- --check
+      - run: cargo clippy --all --all-targets --all-features
+
+  test:
+    name: 🧪 Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - run: cargo build --all-features
+      - run: cargo test
+        env:
+          RUST_BACKTRACE: 1
+
+  cov:
+    name: ☂️ Coverage
+    runs-on: ubuntu-latest
+    container:
+      image: xd009642/tarpaulin:develop-nightly
+      options: --security-opt seccomp=unconfined
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate code coverage
+        run: |
+          cargo tarpaulin -p curies --out xml --verbose --timeout 120
+
+      # - name: Upload to codecov.io
+      #   uses: codecov/codecov-action@v2
+      #   with:
+      #     fail_ci_if_error: true
+      #     token: ${{secrets.CODECOV_TOKEN}}
+
+  # docs:
+  #   name: 📖 Update docs
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     pages: write
+  #     id-token: write
+  #   # Allow one concurrent deployment
+  #   concurrency:
+  #     group: "pages"
+  #     cancel-in-progress: true
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: bash ./scripts/docs-install.sh
+
+  #     - run: bash ./scripts/docs-build.sh
+
+  #     - name: Setup Pages
+  #       uses: actions/configure-pages@v3
+
+  #     - name: Upload artifact
+  #       uses: actions/upload-pages-artifact@v1
+  #       with:
+  #         path: './target/doc'
+
+  #     - name: Deploy to GitHub Pages
+  #       id: deployment
+  #       uses: actions/deploy-pages@v2
