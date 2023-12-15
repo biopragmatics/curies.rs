@@ -9,7 +9,7 @@ use crate::{error::CuriesError, Converter};
 /// # Examples
 ///
 /// ```rust
-/// use curies::{Converter, Record, get_obo_converter};
+/// use curies::{get_obo_converter};
 ///
 /// let converter = get_obo_converter();
 ///
@@ -42,6 +42,25 @@ pub async fn get_monarch_converter() -> Result<Converter, CuriesError> {
 /// It contains prefixes corresponding to semantic spaces that are useful for
 /// modeling the molecular functions, cellular components, and biological processes
 /// that genes take part in.
+/// # Examples
+///
+/// ```rust
+/// use curies::{get_go_converter};
+///
+/// let converter = get_go_converter();
+///
+/// let uri = converter.expand("NCBIGene:100010")?;
+/// assert_eq!(uri, "http://identifiers.org/ncbigene/100010");
+///
+/// let unregistered_uri = converter.expand("DOID:1234");
+/// assert!(unregistered_uri.is_err(), "DOID is not registered in the GO context");
+///
+/// let curie = converter.compress("http://identifiers.org/ncbigene/100010")?;
+/// assert_eq!(curie, "NCBIGene:100010");
+///
+/// let unregistered_curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234");
+/// assert!(unregistered_curie.is_err(), "DOID is not registered in the GO context");
+/// ```
 pub async fn get_go_converter() -> Result<Converter, CuriesError> {
     Converter::from_jsonld("https://raw.githubusercontent.com/prefixcommons/prefixcommons-py/master/prefixcommons/registry/go_context.jsonld").await
 }
