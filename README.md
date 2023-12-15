@@ -51,7 +51,7 @@ cargo test -- --nocapture
 cargo fmt
 ```
 
-### Documentation
+### 📖 Documentation
 
 ```shell
 cargo doc --open
