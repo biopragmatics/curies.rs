@@ -1,0 +1,22 @@
+[package]
+name = "curies-py"
+description = "Python bindings for the curies library"
+repository = "https://github.com/biopragmatics/curies.rs/tree/main/python"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+readme.workspace = true
+license-file.workspace = true
+keywords.workspace = true
+homepage.workspace = true
+categories.workspace = true
+
+[lib]
+name = "curies_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+curies = { version = "0.1.0", path = "../lib" }
+pyo3 = { version = "0.20", features = ["extension-module"] }
+pythonize = "0.20"
+serde = { version = "1.0" }
