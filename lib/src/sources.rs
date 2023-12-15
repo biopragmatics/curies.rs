@@ -1,6 +1,9 @@
 use crate::{error::CuriesError, Converter};
 
 /// Get the latest OBO Foundry JSON-LD context.
+/// The resulting converter contains the OBO Foundry
+/// preferred prefixes and OBO PURL expansions, but no
+/// synonyms.
 ///
 /// # Examples
 ///
@@ -19,7 +22,7 @@ use crate::{error::CuriesError, Converter};
 /// let curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?;
 /// assert_eq!(curie, "DOID:1234");
 ///
-/// let unregistered_curie = converter.compress("http://example.org/missing.prefix:0000001"");
+/// let unregistered_curie = converter.compress("http://example.org/missing.prefix:0000001");
 /// assert!(unregistered_curie.is_err());
 /// ```
 pub async fn get_obo_converter() -> Result<Converter, CuriesError> {
