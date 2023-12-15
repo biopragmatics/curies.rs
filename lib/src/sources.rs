@@ -37,6 +37,9 @@ pub async fn get_obo_converter() -> Result<Converter, CuriesError> {
 
 /// Get the Prefix Commons-maintained [Monarch Initiative
 /// context](https://github.com/prefixcommons/prefixcommons-py/blob/master/prefixcommons/registry/monarch_context.jsonld)
+///
+/// The Monarch Initiative context is a simple prefix map stored in a JSON-LD file.
+/// It contains a project-specific mix of prefixes from GO, OBO, and Identifiers.org.
 pub async fn get_monarch_converter() -> Result<Converter, CuriesError> {
     Converter::from_jsonld("https://raw.githubusercontent.com/prefixcommons/prefixcommons-py/master/prefixcommons/registry/monarch_context.jsonld").await
 }
