@@ -19,13 +19,13 @@ use crate::{error::CuriesError, Converter};
 ///      get_obo_converter().await
 /// }).expect("Failed to create the OBO converter");
 ///
-/// let uri = converter.expand("DOID:1234")?;
+/// let uri = converter.expand("DOID:1234").unwrap();
 /// assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
 ///
 /// let unregistered_uri = converter.expand("missing.prefix:0000001");
 /// assert!(unregistered_uri.is_err());
 ///
-/// let curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?;
+/// let curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234").unwrap();
 /// assert_eq!(curie, "DOID:1234");
 ///
 /// let unregistered_curie = converter.compress("http://example.org/missing.prefix:0000001");
@@ -55,16 +55,20 @@ pub async fn get_monarch_converter() -> Result<Converter, CuriesError> {
 ///
 /// ```rust
 /// use curies::sources::{get_go_converter};
+/// use tokio::{runtime};
+/// 
+/// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+/// let converter = rt.block_on(async {
+///      get_go_converter().await
+/// }).expect("Failed to create the GO converter");
 ///
-/// let converter = get_go_converter();
-///
-/// let uri = converter.expand("NCBIGene:100010")?;
+/// let uri = converter.expand("NCBIGene:100010").unwrap();
 /// assert_eq!(uri, "http://identifiers.org/ncbigene/100010");
 ///
 /// let unregistered_uri = converter.expand("DOID:1234");
 /// assert!(unregistered_uri.is_err(), "DOID is not registered in the GO context");
 ///
-/// let curie = converter.compress("http://identifiers.org/ncbigene/100010")?;
+/// let curie = converter.compress("http://identifiers.org/ncbigene/100010").unwrap();
 /// assert_eq!(curie, "NCBIGene:100010");
 ///
 /// let unregistered_curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234");
