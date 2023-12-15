@@ -2,19 +2,7 @@ use std::error::Error;
 use std::fmt;
 use std::str::Utf8Error;
 
-// #[derive(Debug)]
-// pub struct DuplicateRecordError(pub String);
-
-// impl Error for DuplicateRecordError {}
-
-// impl fmt::Display for DuplicateRecordError {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "Curies Duplicate Record: {}", self.0)
-//     }
-// }
-
-// NOTE: In case we need a generic error that contains other errors
-
+/// Enum of errors returned by this library
 #[derive(Debug)]
 pub enum CuriesError {
     NotFound(String),

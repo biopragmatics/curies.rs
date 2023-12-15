@@ -24,6 +24,31 @@ pub struct Record {
 
 /// A `Converter` is composed of 2 HashMaps (one for prefixes, one for URIs),
 /// and a trie search to find the longest URI
+/// # Examples
+///
+/// ```
+/// use curies::{Converter, Record};
+/// use std::collections::HashSet;
+///
+/// fn use_converter() -> Result<(), Box<dyn std::error::Error>> {
+///     let mut converter = Converter::new();
+///     let record1 = Record {
+///         prefix: "doid".to_string(),
+///         uri_prefix: "http://purl.obolibrary.org/obo/DOID_".to_string(),
+///         prefix_synonyms: HashSet::from(["DOID".to_string()]),
+///         uri_prefix_synonyms: HashSet::from(["https://identifiers.org/DOID/"].map(String::from)),
+///     };
+///     converter.add_record(record1)?;
+///
+///     let uri = converter.expand("doid:1234")?;
+///     assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
+///
+///     let curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?;
+///     assert_eq!(curie, "doid:1234");
+///     Ok(())
+/// }
+/// use_converter().unwrap();
+/// ```
 pub struct Converter {
     prefix_map: HashMap<String, Arc<Record>>,
     uri_map: HashMap<String, Arc<Record>>,
@@ -34,6 +59,22 @@ pub struct Converter {
 
 impl Converter {
     /// Create an empty `Converter`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use curies::{Converter, Record};
+    /// use std::collections::HashSet;
+    ///
+    /// let mut converter = Converter::new();
+    /// let record1 = Record {
+    ///     prefix: "doid".to_string(),
+    ///     uri_prefix: "http://purl.obolibrary.org/obo/DOID_".to_string(),
+    ///     prefix_synonyms: HashSet::from(["DOID".to_string()]),
+    ///     uri_prefix_synonyms: HashSet::from(["https://identifiers.org/DOID/"].map(String::from)),
+    /// };
+    /// converter.add_record(record1).unwrap();
+    /// ```
     pub fn new() -> Self {
         Converter {
             prefix_map: HashMap::new(),
@@ -44,6 +85,18 @@ impl Converter {
     }
 
     /// Create a `Converter` from a prefix `HashMap`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use curies::{Converter, Record};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut prefix_map: HashMap<String, String> = HashMap::new();
+    /// prefix_map.insert("DOID".to_string(), "http://purl.obolibrary.org/obo/DOID_".to_string());
+    /// prefix_map.insert("OBO".to_string(), "http://purl.obolibrary.org/obo/".to_string());
+    /// let converter = Converter::from_prefix_map(prefix_map).unwrap();
+    /// ```
     pub fn from_prefix_map(prefix_map: HashMap<String, String>) -> Result<Self, CuriesError> {
         let mut converter = Converter::default();
         for (prefix, uri_prefix) in prefix_map {
@@ -58,6 +111,17 @@ impl Converter {
     }
 
     /// Create a `Converter` from a JSON-LD file context
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use curies::{Converter, Record, error::CuriesError};
+    ///
+    /// fn test_from_jsonld() -> Result<(), CuriesError> {
+    ///     let converter = Converter::from_jsonld("http://purl.obolibrary.org/meta/obo_context.jsonld");
+    ///     Ok(())
+    /// }
+    /// ```
     pub async fn from_jsonld<T: DataSource>(data: T) -> Result<Self, CuriesError> {
         let prefix_map = data.fetch().await?;
         let mut converter = Converter::default();
@@ -185,7 +249,6 @@ impl Default for Converter {
     }
 }
 
-
 /// Trait to provide the data as URL, HashMap, string, or Path to file
 #[async_trait]
 pub trait DataSource {
@@ -214,9 +277,13 @@ impl DataSource for &str {
             // Making an HTTP request
             let res = reqwest::get(self).await?;
             if res.status().is_success() {
-                return Ok(res.json().await?)
+                return Ok(res.json().await?);
             } else {
-                return Err(CuriesError::Reqwest(format!("{}: {}", res.status(), res.text().await?)))
+                return Err(CuriesError::Reqwest(format!(
+                    "{}: {}",
+                    res.status(),
+                    res.text().await?
+                )));
             }
         } else {
             // Directly parsing the provided string as JSON
@@ -234,7 +301,7 @@ impl DataSource for &Path {
             file.read_to_string(&mut contents)?;
             Ok(serde_json::from_str(&contents)?)
         } else {
-            return Err(CuriesError::NotFound(format!("{:?}", self.to_str())))
+            return Err(CuriesError::NotFound(format!("{:?}", self.to_str())));
         }
     }
 }

@@ -27,6 +27,7 @@ pub struct RecordPy {
 }
 
 impl RecordPy {
+    #[allow(clippy::wrong_self_convention)]
     fn into_record(&self) -> Record {
         Record {
             prefix: self.prefix.clone(),
@@ -95,5 +96,4 @@ impl ConverterPy {
             .compress(&uri)
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
     }
-
 }

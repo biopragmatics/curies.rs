@@ -1,5 +1,5 @@
-use curies::{Converter, Record, sources::get_obo_converter};
-use std::collections::{HashSet, HashMap};
+use curies::{sources::get_obo_converter, Converter, Record};
+use std::collections::{HashMap, HashSet};
 
 #[test]
 fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
@@ -44,12 +44,17 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-
 #[test]
 fn from_prefix_map_converter() -> Result<(), Box<dyn std::error::Error>> {
     let mut prefix_map: HashMap<String, String> = HashMap::new();
-    prefix_map.insert("DOID".to_string(), "http://purl.obolibrary.org/obo/DOID_".to_string());
-    prefix_map.insert("OBO".to_string(), "http://purl.obolibrary.org/obo/".to_string());
+    prefix_map.insert(
+        "DOID".to_string(),
+        "http://purl.obolibrary.org/obo/DOID_".to_string(),
+    );
+    prefix_map.insert(
+        "OBO".to_string(),
+        "http://purl.obolibrary.org/obo/".to_string(),
+    );
     let converter = Converter::from_prefix_map(prefix_map)?;
 
     let uri = converter.expand("DOID:1234")?;
