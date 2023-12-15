@@ -304,7 +304,9 @@ impl DataSource for &Path {
 
 // Python API: https://github.com/cthoyt/curies/blob/main/src/curies/api.py#L1099
 // HashSet more efficient than Vec: https://stackoverflow.com/questions/3185226/huge-performance-difference-between-vector-and-hashset
-// But HashSet are not ordered, while Vec are ordered
+// But HashSet are not ordered, while Vec are ordered.
+// This choice was made since Pydantic is more convenient to use with lists since they
+// are directly JSON-serializable.
 
 // /// Stores the prefix and local unique identifier
 // /// for a compact URI (CURIE)
