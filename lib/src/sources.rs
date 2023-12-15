@@ -1,3 +1,5 @@
+//! Contains functions for getting pre-defined contexts
+
 use crate::{error::CuriesError, Converter};
 
 /// Get the latest [OBO Foundry context](http://purl.obolibrary.org/meta/obo_context.jsonld).
