@@ -60,4 +60,3 @@ cargo fmt
 ```shell
 cargo doc --open
 ```
-
