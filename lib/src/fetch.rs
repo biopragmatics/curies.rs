@@ -83,13 +83,9 @@ async fn fetch_url(url: &str) -> Result<String, CuriesError> {
 
 /// Given a `Path` get the file content if it exists
 async fn fetch_file(path: &Path) -> Result<String, CuriesError> {
-    if path.exists() {
-        // Read from a file path
-        let mut file = File::open(path)?;
-        let mut contents = String::new();
-        file.read_to_string(&mut contents)?;
-        Ok(contents)
-    } else {
-        Err(CuriesError::NotFound(format!("{:?}", path.to_str())))
-    }
+    // Read from a file path
+    let mut file = File::open(path)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
 }

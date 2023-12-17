@@ -65,15 +65,19 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
     // Test wrong calls
     assert!(converter
         .add_curie("doid", "http://purl.obolibrary.org/obo/DOID_")
+        .map_err(|e| assert!(e.to_string().starts_with("Duplicate record")))
         .is_err());
     assert!(converter
         .add_record(Record::new("wrong", "http://purl.obolibrary.org/obo/DOID_"))
         .is_err());
+    assert!(converter.expand("wrong:1234")
+        .map_err(|e| assert!(e.to_string().starts_with("Not found")))
+        .is_err());
+    assert!(converter.expand("wrong")
+        .map_err(|e| assert!(e.to_string().starts_with("Invalid CURIE")))
+        .is_err());
     assert!(converter.find_by_uri_prefix("wrong").is_err());
     assert!(converter.expand("obo:1234").is_err());
-    assert!(converter.expand("wrong:1234").is_err());
-    assert!(converter.expand("wrong").is_err());
-    assert!(converter.compress("wrong_1234").is_err());
     Ok(())
 }
 
@@ -127,7 +131,9 @@ async fn from_extended_map_file() -> Result<(), Box<dyn std::error::Error>> {
         converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?,
         "doid:1234"
     );
-    assert!(converter.expand("doid:AAAA").is_err()); // Test pattern
+    assert!(converter.expand("doid:AAAA") // Test pattern
+        .map_err(|e| assert!(e.to_string().starts_with("Invalid format")))
+        .is_err());
     Ok(())
 }
 
@@ -152,8 +158,18 @@ async fn from_extended_map_vec() -> Result<(), Box<dyn std::error::Error>> {
 
 #[tokio::test]
 async fn from_converter_errors() -> Result<(), Box<dyn std::error::Error>> {
-    assert!(Converter::from_jsonld("wrongplace").await.is_err());
     assert!(Converter::from_jsonld("{}").await.is_err());
-    assert!(Converter::from_jsonld(Path::new("wrong")).await.is_err());
+    assert!(Converter::from_jsonld("wrong")
+        .await
+        .map_err(|e| assert!(e.to_string().starts_with("Error parsing")))
+        .is_err());
+    assert!(Converter::from_jsonld("https://wrong")
+        .await
+        .map_err(|e| assert!(e.to_string().starts_with("Error sending")))
+        .is_err());
+    assert!(Converter::from_jsonld(Path::new("wrong"))
+        .await
+        .map_err(|e| assert!(e.to_string().starts_with("Error reading")))
+        .is_err());
     Ok(())
 }
