@@ -7,7 +7,7 @@ Install maturin:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install "maturin[patchelf]"
+pip install "maturin[patchelf]" pytest
 ```
 
 ## Develop
@@ -18,10 +18,10 @@ Start in dev:
 maturin develop
 ```
 
-Try the python lib:
+Run the tests with:
 
 ```bash
-python try.py
+python -m pytest
 ```
 
 ## Build

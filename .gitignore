@@ -10,6 +10,7 @@ hyperfine_*.deb
 
 # Python
 .venv
+*.pyc
 
 # JS
 node_modules/

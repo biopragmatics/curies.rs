@@ -102,11 +102,11 @@ Build the pip package, and run the `python/try.py` script:
 ./scripts/build-python.sh
 ```
 
-Or just run the script:
+Or just run the tests:
 
 ```bash
 source .venv/bin/activate
-python python/try.py
+python -m pytest python/tests/
 ```
 
 ### 🟨 Run JavaScript

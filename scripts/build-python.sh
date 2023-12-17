@@ -6,4 +6,5 @@ cd python
 
 maturin develop
 
-python try.py
+python -m pip install pytest
+python -m pytest
