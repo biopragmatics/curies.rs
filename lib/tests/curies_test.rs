@@ -70,10 +70,12 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
     assert!(converter
         .add_record(Record::new("wrong", "http://purl.obolibrary.org/obo/DOID_"))
         .is_err());
-    assert!(converter.expand("wrong:1234")
+    assert!(converter
+        .expand("wrong:1234")
         .map_err(|e| assert!(e.to_string().starts_with("Not found")))
         .is_err());
-    assert!(converter.expand("wrong")
+    assert!(converter
+        .expand("wrong")
         .map_err(|e| assert!(e.to_string().starts_with("Invalid CURIE")))
         .is_err());
     assert!(converter.find_by_uri_prefix("wrong").is_err());
@@ -131,7 +133,8 @@ async fn from_extended_map_file() -> Result<(), Box<dyn std::error::Error>> {
         converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?,
         "doid:1234"
     );
-    assert!(converter.expand("doid:AAAA") // Test pattern
+    assert!(converter
+        .expand("doid:AAAA") // Test pattern
         .map_err(|e| assert!(e.to_string().starts_with("Invalid format")))
         .is_err());
     Ok(())
