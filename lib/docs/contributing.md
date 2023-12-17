@@ -168,12 +168,12 @@ cargo install cargo-outdated
    cargo outdated
    ```
 
-2. Bump the version in the `Cargo.toml` file in folders `lib/`, `python`, `js`
+2. Bump the version in the `Cargo.toml` file in folders `lib`, `python`, and `js`:
 
    ```bash
    ./scripts/bump.sh 0.0.2
    ```
 
-3. Commit, push, and create a new release on GitHub
+3. Commit, push, and **create a new release on GitHub**.
 
-4. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), and add them to the new release.
+4. The `build.yml` workflow will automatically build artifacts (pip wheel, npm package), add them to the new release, and publish to public registries (crates.io, PyPI, NPM).

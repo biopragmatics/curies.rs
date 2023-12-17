@@ -19,10 +19,16 @@
         <img src="https://codecov.io/gh/biopragmatics/curies.rs/branch/main/graph/badge.svg" alt="Codecov status" />
     </a>
 </p>
-
 Idiomatic conversion between URIs and compact URIs (CURIEs) in Rust.
 
-## 📥 Install dependencies
+## 📖 Documentation
+
+Checkout the **[biopragmatics.github.io/curies.rs](https://biopragmatics.github.io/curies.rs)** for more details on how to install and use it.
+
+
+## 🧑‍💻 Development
+
+### 📥 Install dependencies
 
 [Rust](https://www.rust-lang.org/tools/install), python 3.8+ and npm are required for development.
 
@@ -34,8 +40,6 @@ cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish
 
 > If you are using VSCode we strongly recommend to install the `rust-lang.rust-analyzer` extension.
 
-
-## Development
 
 ### 🧪 Run tests
 
@@ -56,3 +60,4 @@ cargo fmt
 ```shell
 cargo doc --open
 ```
+

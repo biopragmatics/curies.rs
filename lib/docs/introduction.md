@@ -13,9 +13,9 @@ Whether you're a developer looking to work with CURIEs (e.g. expand or compress)
 ### ✨ CURIEs management
 
 - 🛠️ **Create** your custom converter
-- 📥 **Import** converters from JSON or JSON-LD context, with helper functions for popular converters, such as `get_obo_converter()`.
-- 🔗 **Expand** CURIEs from their compressed form to URIs.
-- 🗜️ **Compress** URIs to CURIEs.
+- 📥 **Import converters** from JSON or JSON-LD context, with helper functions for popular converters, such as `get_obo_converter()`.
+- 🔗 **Expand CURIEs** from their compressed form to URIs.
+- 🗜️ **Compress URIs** to CURIEs.
 
 ### 📦️ Packaged for multiple interfaces
 

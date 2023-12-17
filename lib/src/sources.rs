@@ -109,3 +109,23 @@ pub async fn get_monarch_converter() -> Result<Converter, CuriesError> {
 pub async fn get_go_converter() -> Result<Converter, CuriesError> {
     Converter::from_jsonld("https://raw.githubusercontent.com/prefixcommons/prefixcommons-py/master/prefixcommons/registry/go_context.jsonld").await
 }
+
+/// Get the BioRegistry extended prefix map.
+///
+/// # Examples
+///
+/// ```rust
+/// use curies::sources::get_bioregistry_converter;
+/// use tokio::{runtime};
+///
+/// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+/// let converter = rt.block_on(async {
+///      get_bioregistry_converter().await
+/// }).expect("Failed to create the GO converter");
+///
+/// let uri = converter.expand("NCBIGene:100010").unwrap();
+/// assert_eq!(uri, "https://www.ncbi.nlm.nih.gov/gene/100010");
+/// ```
+pub async fn get_bioregistry_converter() -> Result<Converter, CuriesError> {
+    Converter::from_extended_prefix_map("https://raw.githubusercontent.com/biopragmatics/bioregistry/main/exports/contexts/bioregistry.epm.json").await
+}

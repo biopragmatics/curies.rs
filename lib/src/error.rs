@@ -22,7 +22,7 @@ impl Error for CuriesError {}
 impl fmt::Display for CuriesError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            CuriesError::NotFound(ref prefix) => write!(f, "Prefix not found: {}", prefix),
+            CuriesError::NotFound(ref prefix) => write!(f, "Not found: {}", prefix),
             CuriesError::DuplicateRecord(ref prefix) => {
                 write!(f, "Duplicate record found for prefix: {}", prefix)
             }

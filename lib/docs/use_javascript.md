@@ -4,6 +4,13 @@
 
 You can easily work with CURIEs from JavaScript, or TypeScript with the [`@biopragmatics/curies`](https://www.npmjs.com/package/@biopragmatics/curies) NPM package.
 
+## 📥️ Install
+
+Install the `npm` package (use `yarn` or `pnpm` if you prefer) to use it from your favorite framework:
+
+```bash
+npm install @biopragmatics/curies
+```
 
 ## 🚀 Use it in bare HTML files
 
@@ -54,14 +61,6 @@ Then just start the web server from the directory where the HTML file is with:
 npx http-server
 # Or:
 python -m http.server
-```
-
-## 📥️ Install
-
-Install the `npm` package (use `yarn` or `pnpm` if you prefer) to use it from your favorite framework:
-
-```bash
-npm install @biopragmatics/curies
 ```
 
 ## ⚛️ Use from any JavaScript framework

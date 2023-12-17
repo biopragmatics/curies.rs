@@ -31,6 +31,7 @@ impl RecordJs {
                 uri_prefix,
                 prefix_synonyms: prefix_synonyms_set,
                 uri_prefix_synonyms: uri_prefix_synonyms_set,
+                pattern: None,
             },
         })
     }
@@ -59,7 +60,7 @@ impl ConverterJs {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Result<ConverterJs, JsValue> {
         Ok(Self {
-            converter: Converter::new(),
+            converter: Converter::default(),
         })
     }
 
@@ -67,7 +68,7 @@ impl ConverterJs {
     pub fn add_record(&mut self, record: RecordJs) -> Result<(), JsValue> {
         self.converter
             .add_record(record.record)
-            .map(|_| ())
+            .map(|_| self.converter.build())
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 

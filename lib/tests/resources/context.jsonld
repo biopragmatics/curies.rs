@@ -1,0 +1,15 @@
+{
+    "@context": {
+        "ignore": ["ignore"],
+        "BIOMD": "http://www.ebi.ac.uk/compneur-srv/biomodels-main/publ-model.do?mid=",
+        "COG_Function": "http://www.ncbi.nlm.nih.gov/COG/grace/shokog.cgi?fun=",
+        "WB": "http://identifiers.org/wormbase/",
+        "FBbt": "http://purl.obolibrary.org/obo/FBbt_",
+        "KEGG_LIGAND": "http://www.genome.jp/dbget-bin/www_bget?cpd:",
+        "PSO_GIT": "https://github.com/Planteome/plant-stress-ontology/issues/",
+        "MaizeGDB_stock": "http://maizegdb.org/data_center/stock?id=",
+        "EMAPA": "http://purl.obolibrary.org/obo/EMAPA_",
+        "GO": "http://purl.obolibrary.org/obo/GO_",
+        "DOID": "http://purl.obolibrary.org/obo/DOID_"
+    }
+}

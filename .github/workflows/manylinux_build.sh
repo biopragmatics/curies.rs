@@ -1,5 +1,5 @@
 cd /workdir
-yum -y install centos-release-scl-rh
+yum -y install centos-release-scl-rh openssl-devel
 yum -y install llvm-toolset-7.0
 source scl_source enable llvm-toolset-7.0
 curl https://static.rust-lang.org/rustup/dist/%arch%-unknown-linux-gnu/rustup-init --output rustup-init

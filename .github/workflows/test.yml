@@ -41,8 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Generate code coverage
-        run: |
-          cargo tarpaulin -p curies --out xml --verbose --timeout 120
+        run: bash ./scripts/cov.sh
 
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v2

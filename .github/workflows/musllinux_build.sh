@@ -1,5 +1,5 @@
 cd /workdir
-apk add clang-dev
+apk add clang-dev openssl-dev
 curl https://static.rust-lang.org/rustup/dist/%arch%-unknown-linux-musl/rustup-init --output rustup-init
 chmod +x rustup-init
 ./rustup-init -y --profile minimal

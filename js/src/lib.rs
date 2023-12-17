@@ -2,7 +2,7 @@ use js_sys::Error;
 // #![allow(clippy::unused_unit)]
 use wasm_bindgen::prelude::*;
 
-mod curies;
+mod api;
 
 #[wasm_bindgen(start)]
 pub fn startup() {

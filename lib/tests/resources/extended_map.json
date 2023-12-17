@@ -1,0 +1,92 @@
+[
+    {
+        "pattern": "^B\\d{5}$",
+        "prefix": "3dmet",
+        "uri_prefix": "http://www.3dmet.dna.affrc.go.jp/cgi/show_data.php?acc=",
+        "uri_prefix_synonyms": [
+            "3DMET:",
+            "3dmet:",
+            "http://bio2rdf.org/3dmet:",
+            "http://bioregistry.io/3dmet:",
+            "http://identifiers.org/3dmet/",
+            "http://identifiers.org/3dmet:",
+            "http://n2t.net/3dmet:",
+            "https://bio2rdf.org/3dmet:",
+            "https://bioregistry.io/3dmet:",
+            "https://identifiers.org/3dmet/",
+            "https://identifiers.org/3dmet:",
+            "https://n2t.net/3dmet:",
+            "https://www.3dmet.dna.affrc.go.jp/cgi/show_data.php?acc="
+        ]
+    },
+    {
+        "pattern": "^4DN[A-Z]{2}[A-Z0-9]{7}$",
+        "prefix": "4dn.biosource",
+        "prefix_synonyms": [
+            "4DN"
+        ],
+        "uri_prefix": "https://data.4dnucleome.org/biosources/",
+        "uri_prefix_synonyms": [
+            "4DN.BIOSOURCE:",
+            "4DN:",
+            "4dn.biosource:",
+            "4dn:",
+            "http://bio2rdf.org/4dn:",
+            "http://bioregistry.io/4DN:",
+            "http://bioregistry.io/4dn.biosource:",
+            "http://data.4dnucleome.org/",
+            "http://data.4dnucleome.org/biosources/",
+            "http://identifiers.org/4dn/",
+            "http://identifiers.org/4dn:",
+            "https://bio2rdf.org/4dn:",
+            "https://bioregistry.io/4DN:",
+            "https://bioregistry.io/4dn.biosource:",
+            "https://data.4dnucleome.org/",
+            "https://identifiers.org/4dn/",
+            "https://identifiers.org/4dn:"
+        ]
+    },
+    {
+        "pattern": "^\\d+$",
+        "prefix": "doid",
+        "prefix_synonyms": [
+            "do"
+        ],
+        "uri_prefix": "http://purl.obolibrary.org/obo/DOID_",
+        "uri_prefix_synonyms": [
+            "DO:",
+            "DOID:",
+            "do:",
+            "doid:",
+            "http://bio2rdf.org/do:",
+            "http://bioregistry.io/DOID:",
+            "http://bioregistry.io/do:",
+            "http://bioregistry.io/doid:",
+            "http://disease-ontology.org/term/",
+            "http://disease-ontology.org/term/DOID:",
+            "http://identifiers.org/DOID/",
+            "http://identifiers.org/DOID:",
+            "http://identifiers.org/doid/DOID:",
+            "http://n2t.net/doid:",
+            "http://purl.org/obo/owl/DOID#DOID_",
+            "http://www.disease-ontology.org/?id=",
+            "http://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http://purl.obolibrary.org/obo/DOID_",
+            "http://www.ebi.ac.uk/ols4/ontologies/doid/terms?obo_id=DOID:",
+            "https://bio2rdf.org/do:",
+            "https://bioregistry.io/DOID:",
+            "https://bioregistry.io/do:",
+            "https://bioregistry.io/doid:",
+            "https://disease-ontology.org/term/",
+            "https://disease-ontology.org/term/DOID:",
+            "https://identifiers.org/DOID/",
+            "https://identifiers.org/DOID:",
+            "https://identifiers.org/doid/DOID:",
+            "https://n2t.net/doid:",
+            "https://purl.obolibrary.org/obo/DOID_",
+            "https://purl.org/obo/owl/DOID#DOID_",
+            "https://www.disease-ontology.org/?id=",
+            "https://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http://purl.obolibrary.org/obo/DOID_",
+            "https://www.ebi.ac.uk/ols4/ontologies/doid/terms?obo_id=DOID:"
+        ]
+    }
+]
