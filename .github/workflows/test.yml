@@ -66,6 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash ./scripts/docs-install.sh
+      - uses: Swatinem/rust-cache@v2
 
       - run: bash ./scripts/docs-build.sh
 

@@ -1,4 +1,5 @@
 use curies::{Converter, Record};
+use serde_json::Value;
 use std::{
     collections::{HashMap, HashSet},
     path::Path,
@@ -19,7 +20,7 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
         uri_prefix: "http://purl.obolibrary.org/obo/".to_string(),
         prefix_synonyms: HashSet::from(["OBO".to_string()]),
         uri_prefix_synonyms: HashSet::from(["https://identifiers.org/obo/"].map(String::from)),
-        pattern: Some("\\".to_string()), // Wrong pattern to test
+        pattern: Some("\\".to_string()), // Wrong pattern for test
     };
     assert!(format!("{}", record1).starts_with("Prefix: doid"));
     assert!(format!("{}", converter).starts_with("Converter contains"));
@@ -60,6 +61,19 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(
         converter.compress("https://identifiers.org/DOID/1234")?,
         "doid:1234"
+    );
+    assert_eq!(
+        converter
+            .compress_list(["http://wrong/1234", "https://identifiers.org/DOID/1234"].to_vec()),
+        [None, Some("doid:1234".to_string())].to_vec()
+    );
+    assert_eq!(
+        converter.expand_list(["doid:1234", "wrong:1234"].to_vec()),
+        [
+            Some("http://purl.obolibrary.org/obo/DOID_1234".to_string()),
+            None
+        ]
+        .to_vec()
     );
 
     // Test wrong calls
@@ -103,6 +117,8 @@ async fn from_prefix_map_converter() -> Result<(), Box<dyn std::error::Error>> {
         converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?,
         "DOID:1234"
     );
+    assert!(Converter::from_jsonld(prefix_map).await.is_err());
+    let prefix_map: HashMap<String, Value> = HashMap::new();
     assert!(Converter::from_jsonld(prefix_map).await.is_err());
     Ok(())
 }

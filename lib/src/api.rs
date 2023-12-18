@@ -312,6 +312,27 @@ impl Converter {
         Ok(format!("{}{}", record.uri_prefix, id))
     }
 
+    /// Compresses a list of URIs to CURIEs
+    pub fn compress_list(&self, uris: Vec<&str>) -> Vec<Option<String>> {
+        uris.into_iter()
+            .map(|uri| match self.compress(uri) {
+                Ok(curie) => Some(curie),
+                Err(_) => None,
+            })
+            .collect()
+    }
+
+    /// Expands a list of CURIESs to URIs
+    pub fn expand_list(&self, curies: Vec<&str>) -> Vec<Option<String>> {
+        curies
+            .into_iter()
+            .map(|curie| match self.expand(curie) {
+                Ok(uri) => Some(uri),
+                Err(_) => None,
+            })
+            .collect()
+    }
+
     /// Returns the number of `Records` in the `Converter`
     pub fn len(&self) -> usize {
         self.records.len()
