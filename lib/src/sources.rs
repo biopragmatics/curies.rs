@@ -12,7 +12,7 @@ use crate::{error::CuriesError, Converter};
 ///
 /// ```rust
 /// use curies::sources::{get_obo_converter};
-/// use tokio::{runtime};
+/// use tokio::runtime;
 ///
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let converter = rt.block_on(async {
@@ -52,7 +52,7 @@ pub async fn get_obo_converter() -> Result<Converter, CuriesError> {
 ///
 /// ```rust
 /// use curies::sources::{get_monarch_converter};
-/// use tokio::{runtime};
+/// use tokio::runtime;
 ///
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let converter = rt.block_on(async {
@@ -87,7 +87,7 @@ pub async fn get_monarch_converter() -> Result<Converter, CuriesError> {
 ///
 /// ```rust
 /// use curies::sources::{get_go_converter};
-/// use tokio::{runtime};
+/// use tokio::runtime;
 ///
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let converter = rt.block_on(async {
@@ -116,7 +116,7 @@ pub async fn get_go_converter() -> Result<Converter, CuriesError> {
 ///
 /// ```rust
 /// use curies::sources::get_bioregistry_converter;
-/// use tokio::{runtime};
+/// use tokio::runtime;
 ///
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let converter = rt.block_on(async {

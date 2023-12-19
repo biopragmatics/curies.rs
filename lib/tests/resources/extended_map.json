@@ -50,9 +50,10 @@
         "pattern": "^\\d+$",
         "prefix": "doid",
         "prefix_synonyms": [
-            "do"
+            "do",
+            "DOID"
         ],
-        "uri_prefix": "http://purl.obolibrary.org/obo/DOID_",
+        "uri_prefix": "http://purl.obolibrary.org/obo/SPECIAL_DOID_",
         "uri_prefix_synonyms": [
             "DO:",
             "DOID:",
@@ -88,5 +89,14 @@
             "https://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http://purl.obolibrary.org/obo/DOID_",
             "https://www.ebi.ac.uk/ols4/ontologies/doid/terms?obo_id=DOID:"
         ]
+    },
+    {
+        "pattern": "^\\d{7}$",
+        "prefix": "GO",
+        "prefix_synonyms": [
+            "go",
+            "specialgo"
+        ],
+        "uri_prefix": "http://purl.obolibrary.org/obo/SPECIAL_GO_"
     }
 ]

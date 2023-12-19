@@ -39,6 +39,8 @@ curies.rs/
 
 [Rust](https://www.rust-lang.org/tools/install), python, and NodeJS are required for development.
 
+> If you are using VSCode we strongly recommend to install the `rust-lang.rust-analyzer` extension.
+
 Install development dependencies:
 
 ```bash

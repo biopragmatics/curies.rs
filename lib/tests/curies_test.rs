@@ -1,4 +1,7 @@
-use curies::{Converter, Record};
+use curies::{
+    sources::{get_bioregistry_converter, get_go_converter},
+    Converter, Record,
+};
 use serde_json::Value;
 use std::{
     collections::{HashMap, HashSet},
@@ -94,6 +97,22 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
         .is_err());
     assert!(converter.find_by_uri_prefix("wrong").is_err());
     assert!(converter.expand("obo:1234").is_err());
+    let record3 = Record {
+        prefix: "wrong".to_string(),
+        uri_prefix: "http://wrong.org/".to_string(),
+        prefix_synonyms: HashSet::new(),
+        uri_prefix_synonyms: HashSet::from(["https://identifiers.org/obo/"].map(String::from)),
+        pattern: None,
+    };
+    assert!(converter.add_record(record3).is_err());
+    let record4 = Record {
+        prefix: "wrong".to_string(),
+        uri_prefix: "http://wrong.org/".to_string(),
+        prefix_synonyms: HashSet::from(["OBO".to_string()]),
+        uri_prefix_synonyms: HashSet::new(),
+        pattern: None,
+    };
+    assert!(converter.add_record(record4).is_err());
     Ok(())
 }
 
@@ -143,10 +162,10 @@ async fn from_extended_map_file() -> Result<(), Box<dyn std::error::Error>> {
         Converter::from_extended_prefix_map(Path::new("tests/resources/extended_map.json")).await?;
     assert_eq!(
         converter.expand("doid:1234")?,
-        "http://purl.obolibrary.org/obo/DOID_1234"
+        "http://purl.obolibrary.org/obo/SPECIAL_DOID_1234"
     );
     assert_eq!(
-        converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?,
+        converter.compress("https://purl.obolibrary.org/obo/DOID_1234")?,
         "doid:1234"
     );
     assert!(converter
@@ -190,5 +209,25 @@ async fn from_converter_errors() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .map_err(|e| assert!(e.to_string().starts_with("Error reading")))
         .is_err());
+    Ok(())
+}
+
+#[tokio::test]
+async fn chain_converters() -> Result<(), Box<dyn std::error::Error>> {
+    let mut converter = Converter::chain(vec![
+        get_bioregistry_converter().await?,
+        Converter::from_extended_prefix_map(Path::new("tests/resources/extended_map.json")).await?,
+        // get_go_converter().await?,
+    ])?;
+    assert_eq!(
+        converter.compress("http://purl.obolibrary.org/obo/SPECIAL_DOID_1234")?,
+        "doid:1234"
+    );
+    assert_eq!(
+        converter.expand("specialgo:1234567")?,
+        "http://purl.obolibrary.org/obo/GO_1234567"
+    );
+    assert!(Converter::chain(vec![]).is_err());
+    assert!(converter.delete_record("Wrong").is_err());
     Ok(())
 }

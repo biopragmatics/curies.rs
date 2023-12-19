@@ -19,44 +19,8 @@
         <img src="https://codecov.io/gh/biopragmatics/curies.rs/branch/main/graph/badge.svg" alt="Codecov status" />
     </a>
 </p>
-Idiomatic conversion between URIs and compact URIs (CURIEs) in Rust.
+Idiomatic conversion between URIs and compact URIs (CURIEs) in Rust, with bindings to Python, and JavaScript compiled to WebAssembly.
 
 ## 📖 Documentation
 
 Checkout the **[biopragmatics.github.io/curies.rs](https://biopragmatics.github.io/curies.rs)** for more details on how to install and use it.
-
-
-## 🧑‍💻 Development
-
-### 📥 Install dependencies
-
-[Rust](https://www.rust-lang.org/tools/install), python 3.8+ and npm are required for development.
-
-```bash
-rustup update
-rustup component add rustfmt clippy
-cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish
-```
-
-> If you are using VSCode we strongly recommend to install the `rust-lang.rust-analyzer` extension.
-
-
-### 🧪 Run tests
-
-Run tests and display prints:
-
-```shell
-cargo test -- --nocapture
-```
-
-### 🧹 Format
-
-```shell
-cargo fmt
-```
-
-### 📖 Documentation
-
-```shell
-cargo doc --open
-```

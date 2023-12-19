@@ -87,7 +87,6 @@ pub struct Converter {
     records: Vec<Arc<Record>>,
     prefix_map: HashMap<String, Arc<Record>>,
     uri_map: HashMap<String, Arc<Record>>,
-    trie_builder: TrieBuilder<u8>,
     trie: Trie<u8>,
     delimiter: String,
 }
@@ -108,7 +107,6 @@ impl Converter {
             records: Vec::new(),
             prefix_map: HashMap::new(),
             uri_map: HashMap::new(),
-            trie_builder: TrieBuilder::new(),
             trie: TrieBuilder::new().build(),
             delimiter: delimiter.to_string(),
         }
@@ -204,7 +202,7 @@ impl Converter {
         Ok(converter)
     }
 
-    /// Add a `Record` to the `Converter`
+    /// Add a `Record` to the `Converter`.
     /// When adding a new record we create a reference to the `Record` (Arc)
     /// And we use this reference in the prefix and URI hashmaps
     pub fn add_record(&mut self, record: Record) -> Result<(), CuriesError> {
@@ -215,20 +213,27 @@ impl Converter {
         if self.uri_map.contains_key(&rec.uri_prefix) {
             return Err(CuriesError::DuplicateRecord(rec.uri_prefix.clone()));
         }
-        // TODO: check if synonyms are unique?
+        // Check if any of the synonyms are already present in the maps
+        for prefix in &rec.prefix_synonyms {
+            if self.prefix_map.contains_key(prefix) {
+                return Err(CuriesError::DuplicateRecord(prefix.clone()));
+            }
+        }
+        for uri_prefix in &rec.uri_prefix_synonyms {
+            if self.uri_map.contains_key(uri_prefix) {
+                return Err(CuriesError::DuplicateRecord(uri_prefix.clone()));
+            }
+        }
 
         self.records.push(rec.clone());
         self.prefix_map.insert(rec.prefix.clone(), rec.clone());
         self.uri_map.insert(rec.uri_prefix.clone(), rec.clone());
-        self.trie_builder.push(&rec.uri_prefix);
         for prefix in &rec.prefix_synonyms {
             self.prefix_map.insert(prefix.clone(), rec.clone());
         }
         for uri_prefix in &rec.uri_prefix_synonyms {
             self.uri_map.insert(uri_prefix.clone(), rec.clone());
-            self.trie_builder.push(uri_prefix);
         }
-        // self.trie = self.trie_builder.build();
         Ok(())
     }
 
@@ -239,7 +244,109 @@ impl Converter {
 
     /// Build trie search once all `Records` have been added
     pub fn build(&mut self) {
-        self.trie = self.trie_builder.build();
+        let mut trie_builder = TrieBuilder::new();
+        for record in &self.records {
+            trie_builder.push(&record.uri_prefix);
+            for uri_prefix in &record.uri_prefix_synonyms {
+                trie_builder.push(uri_prefix);
+            }
+        }
+        self.trie = trie_builder.build();
+    }
+
+    /// Chain multiple `Converters` into a single `Converter`. The first `Converter` in the list is used as the base.
+    /// If the same prefix is found in multiple converters, the first occurrence is kept,
+    /// but the `uri_prefix` and synonyms are added as synonyms if they are different.
+    ///
+    /// ```
+    /// use curies::{sources::{get_go_converter, get_obo_converter}, Converter};
+    /// use std::path::Path;
+    ///
+    /// let rt = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    /// let converter = rt.block_on(async {
+    ///      Converter::chain(vec![
+    ///         get_obo_converter().await.unwrap(),
+    ///         get_go_converter().await.unwrap(),
+    ///     ])
+    /// }).expect("Failed to create the chained converter");
+    /// ```
+    pub fn chain(mut converters: Vec<Converter>) -> Result<Converter, CuriesError> {
+        if converters.is_empty() {
+            return Err(CuriesError::InvalidFormat(
+                "The list of converters is empty".to_string(),
+            ));
+        }
+        let mut base_converter = converters.remove(0);
+        for converter in converters {
+            for arc_record in converter.records {
+                let record = Arc::try_unwrap(arc_record).unwrap_or_else(|arc| (*arc).clone());
+                // Function to check if the record or its synonyms already exist in the base converter
+                let find_record = |r: &Record| -> Option<Arc<Record>> {
+                    base_converter
+                        .prefix_map
+                        .get(&r.prefix)
+                        .cloned()
+                        .or_else(|| {
+                            r.prefix_synonyms
+                                .iter()
+                                .find_map(|synonym| base_converter.prefix_map.get(synonym).cloned())
+                        })
+                };
+                if let Some(existing_arc) = find_record(&record) {
+                    if existing_arc.uri_prefix != record.uri_prefix {
+                        // Add the uri_prefix of the record as a synonym to the existing record
+                        let mut updated_record = Arc::try_unwrap(existing_arc.clone())
+                            .unwrap_or_else(|arc| (*arc).clone());
+                        // Merge synonyms
+                        updated_record
+                            .uri_prefix_synonyms
+                            .insert(record.uri_prefix.clone());
+                        updated_record
+                            .uri_prefix_synonyms
+                            .extend(record.uri_prefix_synonyms.clone());
+                        updated_record
+                            .prefix_synonyms
+                            .extend(record.prefix_synonyms.clone());
+                        base_converter.delete_record(&updated_record.prefix)?;
+                        base_converter.add_record(updated_record)?;
+                    }
+                } else {
+                    // If the prefix does not exist, add the record
+                    base_converter.add_record(record)?;
+                }
+            }
+        }
+        base_converter.build();
+        Ok(base_converter)
+    }
+
+    /// Delete a `Record` from the `Converter` based on its prefix.
+    ///
+    /// ```
+    /// use curies::{Converter, Record};
+    ///
+    /// let mut converter = Converter::default();
+    /// assert!(converter.delete_record("DOID").is_err());
+    /// ```
+    pub fn delete_record(&mut self, prefix: &str) -> Result<(), CuriesError> {
+        // Check if the record exists
+        let record = match self.prefix_map.get(prefix) {
+            Some(record) => Arc::clone(record),
+            None => return Err(CuriesError::NotFound(prefix.to_string())),
+        };
+        // Remove the record from the records vector, prefix map, and uri map
+        self.records.retain(|r| r.prefix != prefix);
+        self.prefix_map.remove(&record.prefix);
+        self.uri_map.remove(&record.uri_prefix);
+        // Also remove any synonyms from the maps
+        for p_synonym in &record.prefix_synonyms {
+            self.prefix_map.remove(p_synonym);
+        }
+        for u_synonym in &record.uri_prefix_synonyms {
+            self.uri_map.remove(u_synonym);
+        }
+        self.build();
+        Ok(())
     }
 
     /// Find corresponding CURIE `Record` given a prefix
