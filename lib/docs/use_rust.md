@@ -2,13 +2,56 @@
 
 [![crates.io](https://img.shields.io/crates/v/curies.svg)](https://crates.io/crates/curies)
 
-You can use the Rust crate to work with CURIEs:
+## 🛠️ General usage
+
+You can use the Rust crate to work with CURIEs: import converters, compress URIs, expand CURIEs.
+
+```rust
+use curies::{Converter, Record, sources::get_bioregistry_converter};
+use std::collections::HashSet;
+
+async fn usage_example() -> Result<(), Box<dyn std::error::Error>> {
+
+    // Load from a prefix map json (string or URI)
+    let converterFromMap = Converter::from_prefix_map(r#"{
+  "doid": "http://purl.obolibrary.org/obo/MY_DOID_"
+}"#).await?;
+
+    // Load from an extended prefix map (string or URI)
+    let converterFromUrl = Converter::from_extended_prefix_map("https://raw.githubusercontent.com/biopragmatics/bioregistry/main/exports/contexts/bioregistry.epm.json").await?;
+
+    // Load from a JSON-LD context (string or URI)
+    let converterFromJsonld = Converter::from_jsonld("http://purl.obolibrary.org/meta/obo_context.jsonld").await?;
+
+    // Load from one of the predefined source
+    let converterFromSource = get_bioregistry_converter().await?;
+
+    // Chain multiple converters in one
+    let converter = Converter::chain(vec![converterFromMap, converterFromUrl, converterFromSource])?;
+
+    let uri = converter.expand("doid:1234")?;
+    println!("Expanded CURIE: {}", uri);
+
+    let curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?;
+    println!("Compressed URI: {}", curie);
+    Ok(())
+}
+
+let rt = tokio::runtime::Runtime::new().unwrap();
+rt.block_on(async {
+    usage_example().await
+}).unwrap();
+```
+
+## 🏗️ Build a converter
+
+You can also build a `Converter` from scratch:
 
 ```rust
 use curies::{Converter, Record};
 use std::collections::HashSet;
 
-fn example() -> Result<(), Box<dyn std::error::Error>> {
+fn build_example() -> Result<(), Box<dyn std::error::Error>> {
     let mut converter = Converter::default();
 
     let record1 = Record {
@@ -21,7 +64,6 @@ fn example() -> Result<(), Box<dyn std::error::Error>> {
     let record2 = Record::new("obo", "http://purl.obolibrary.org/obo/");
     converter.add_record(record1)?;
     converter.add_record(record2)?;
-    converter.build();
 
     let uri = converter.expand("doid:1234")?;
     println!("Expanded CURIE: {}", uri);
@@ -30,7 +72,7 @@ fn example() -> Result<(), Box<dyn std::error::Error>> {
     println!("Compressed URI: {}", curie);
     Ok(())
 }
-example().unwrap();
+build_example().unwrap();
 ```
 
 ## 📖 API reference

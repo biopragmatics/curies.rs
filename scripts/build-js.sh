@@ -3,7 +3,7 @@ set -e
 
 cd js
 
-npm run build
+npm run test
 
 python3 -m http.server
 # Or npm run start

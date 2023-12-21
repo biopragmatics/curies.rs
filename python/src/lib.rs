@@ -90,7 +90,6 @@ impl ConverterPy {
     fn add_record(&mut self, record: RecordPy) -> PyResult<()> {
         self.converter
             .add_record(record.record)
-            .map(|_| self.converter.build())
             .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
     }
 

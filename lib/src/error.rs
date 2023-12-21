@@ -1,3 +1,5 @@
+//! Errors thrown by the library
+
 use std::error::Error;
 use std::fmt;
 use std::str::Utf8Error;

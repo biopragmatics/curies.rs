@@ -1,12 +1,15 @@
+//! API for `Converter` and `Record`
+
 use crate::error::CuriesError;
 use crate::fetch::{ExtendedPrefixMapSource, PrefixMapSource};
+use ptrie::Trie;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::sync::Arc;
-use trie_rs::{Trie, TrieBuilder};
+// use trie_rs::{Trie, TrieBuilder};
 
 /// A CURIE `Record`, containing its prefixes and URI prefixes,
 /// used by `Converters` to resolve CURIEs and URIs.
@@ -72,7 +75,6 @@ impl fmt::Display for Record {
 ///         pattern: None,
 ///     };
 ///     converter.add_record(record1)?;
-///     converter.build();
 ///
 ///     let uri = converter.expand("doid:1234")?;
 ///     assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
@@ -83,11 +85,12 @@ impl fmt::Display for Record {
 /// }
 /// use_converter().unwrap();
 /// ```
+#[derive(Debug, Clone)]
 pub struct Converter {
     records: Vec<Arc<Record>>,
     prefix_map: HashMap<String, Arc<Record>>,
     uri_map: HashMap<String, Arc<Record>>,
-    trie: Trie<u8>,
+    trie: Trie<char, Arc<Record>>,
     delimiter: String,
 }
 
@@ -107,7 +110,8 @@ impl Converter {
             records: Vec::new(),
             prefix_map: HashMap::new(),
             uri_map: HashMap::new(),
-            trie: TrieBuilder::new().build(),
+            // trie: TrieBuilder::new().build(),
+            trie: Trie::<char, Arc<Record>>::new(),
             delimiter: delimiter.to_string(),
         }
     }
@@ -139,7 +143,6 @@ impl Converter {
                 converter.add_record(Record::new(&prefix, &uri_prefix_str))?;
             }
         }
-        converter.build();
         Ok(converter)
     }
 
@@ -173,7 +176,6 @@ impl Converter {
                 _ => continue,
             }
         }
-        converter.build();
         Ok(converter)
     }
 
@@ -191,14 +193,13 @@ impl Converter {
     /// let converter = Converter::from_extended_prefix_map("https://raw.github.com/biopragmatics/bioregistry/main/exports/contexts/bioregistry.epm.json");
     /// ```
     pub async fn from_extended_prefix_map<T: ExtendedPrefixMapSource>(
-        data: T,
+        prefix_map: T,
     ) -> Result<Self, CuriesError> {
-        let records = data.fetch().await?;
+        let records = prefix_map.fetch().await?;
         let mut converter = Converter::default();
         for record in records {
             converter.add_record(record)?;
         }
-        converter.build();
         Ok(converter)
     }
 
@@ -227,12 +228,15 @@ impl Converter {
 
         self.records.push(rec.clone());
         self.prefix_map.insert(rec.prefix.clone(), rec.clone());
-        self.uri_map.insert(rec.uri_prefix.clone(), rec.clone());
         for prefix in &rec.prefix_synonyms {
             self.prefix_map.insert(prefix.clone(), rec.clone());
         }
+        self.uri_map.insert(rec.uri_prefix.clone(), rec.clone());
+        self.trie
+            .insert(rec.uri_prefix.clone().chars(), rec.clone());
         for uri_prefix in &rec.uri_prefix_synonyms {
             self.uri_map.insert(uri_prefix.clone(), rec.clone());
+            self.trie.insert(uri_prefix.chars(), rec.clone());
         }
         Ok(())
     }
@@ -240,18 +244,6 @@ impl Converter {
     /// Add a CURIE prefix and its prefix URI to the `Converter`
     pub fn add_curie(&mut self, prefix: &str, uri_prefix: &str) -> Result<(), CuriesError> {
         self.add_record(Record::new(prefix, uri_prefix))
-    }
-
-    /// Build trie search once all `Records` have been added
-    pub fn build(&mut self) {
-        let mut trie_builder = TrieBuilder::new();
-        for record in &self.records {
-            trie_builder.push(&record.uri_prefix);
-            for uri_prefix in &record.uri_prefix_synonyms {
-                trie_builder.push(uri_prefix);
-            }
-        }
-        self.trie = trie_builder.build();
     }
 
     /// Chain multiple `Converters` into a single `Converter`. The first `Converter` in the list is used as the base.
@@ -307,8 +299,7 @@ impl Converter {
                         updated_record
                             .prefix_synonyms
                             .extend(record.prefix_synonyms.clone());
-                        base_converter.delete_record(&updated_record.prefix)?;
-                        base_converter.add_record(updated_record)?;
+                        base_converter.update_record(updated_record)?;
                     }
                 } else {
                     // If the prefix does not exist, add the record
@@ -316,36 +307,53 @@ impl Converter {
                 }
             }
         }
-        base_converter.build();
         Ok(base_converter)
     }
 
-    /// Delete a `Record` from the `Converter` based on its prefix.
+    /// Update a `Record` in the `Converter`.
     ///
     /// ```
     /// use curies::{Converter, Record};
     ///
     /// let mut converter = Converter::default();
-    /// assert!(converter.delete_record("DOID").is_err());
+    /// let record = Record::new("doid", "http://purl.obolibrary.org/obo/DOID_");
+    /// converter.add_record(record.clone()).unwrap();
+    /// assert!(converter.update_record(record).is_ok());
     /// ```
-    pub fn delete_record(&mut self, prefix: &str) -> Result<(), CuriesError> {
-        // Check if the record exists
-        let record = match self.prefix_map.get(prefix) {
-            Some(record) => Arc::clone(record),
-            None => return Err(CuriesError::NotFound(prefix.to_string())),
-        };
-        // Remove the record from the records vector, prefix map, and uri map
-        self.records.retain(|r| r.prefix != prefix);
-        self.prefix_map.remove(&record.prefix);
-        self.uri_map.remove(&record.uri_prefix);
-        // Also remove any synonyms from the maps
-        for p_synonym in &record.prefix_synonyms {
-            self.prefix_map.remove(p_synonym);
+    pub fn update_record(&mut self, record: Record) -> Result<(), CuriesError> {
+        let rec = Arc::new(record);
+        // Update the record in the records vector
+        if let Some(pos) = self.records.iter().position(|r| r.prefix == rec.prefix) {
+            self.records[pos] = rec.clone();
+        } else {
+            return Err(CuriesError::NotFound(rec.prefix.clone()));
         }
-        for u_synonym in &record.uri_prefix_synonyms {
-            self.uri_map.remove(u_synonym);
+        // Update the maps and trie
+        self.prefix_map.insert(rec.prefix.clone(), rec.clone());
+        self.uri_map.insert(rec.uri_prefix.clone(), rec.clone());
+        for prefix in &rec.prefix_synonyms {
+            self.prefix_map.insert(prefix.clone(), rec.clone());
         }
-        self.build();
+        for uri_prefix in &rec.uri_prefix_synonyms {
+            self.uri_map.insert(uri_prefix.clone(), rec.clone());
+        }
+        if self
+            .trie
+            .set_value(rec.uri_prefix.chars(), rec.clone())
+            .is_err()
+        {
+            self.trie.insert(rec.uri_prefix.chars(), rec.clone());
+        }
+
+        for uri_prefix in &rec.uri_prefix_synonyms {
+            if self
+                .trie
+                .set_value(uri_prefix.chars(), rec.clone())
+                .is_err()
+            {
+                self.trie.insert(uri_prefix.chars(), rec.clone());
+            }
+        }
         Ok(())
     }
 
@@ -366,13 +374,18 @@ impl Converter {
     }
 
     /// Find corresponding CURIE `Record` given a complete URI
-    pub fn find_by_uri(&self, uri: &str) -> Result<&Arc<Record>, CuriesError> {
-        let matching_uris = self.trie.common_prefix_search(uri);
-        let utf8_uri = match matching_uris.last() {
-            Some(u) => Ok(u),
+    pub fn find_by_uri(&self, uri: &str) -> Result<Arc<Record>, CuriesError> {
+        // let matching_uris = self.trie.common_prefix_search(uri);
+        // println!("{:?}", matching_uris);
+        // let utf8_uri = match matching_uris.last() {
+        //     Some(u) => Ok(u),
+        //     None => Err(CuriesError::NotFound(uri.to_string())),
+        // };
+        // self.find_by_uri_prefix(std::str::from_utf8(utf8_uri?)?)
+        match self.trie.find_longest_prefix(uri.chars()) {
+            Some(rec) => Ok(rec),
             None => Err(CuriesError::NotFound(uri.to_string())),
-        };
-        self.find_by_uri_prefix(std::str::from_utf8(utf8_uri?)?)
+        }
     }
 
     /// Validate an id against a `Record` regex pattern if it exists
@@ -403,7 +416,7 @@ impl Converter {
                     .find_map(|synonym| uri.strip_prefix(synonym))
             })
             .ok_or_else(|| CuriesError::NotFound(uri.to_string()))?;
-        self.validate_id(id, record)?;
+        self.validate_id(id, &record)?;
         Ok(format!("{}{}{}", &record.prefix, self.delimiter, id))
     }
 

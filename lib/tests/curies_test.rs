@@ -1,7 +1,4 @@
-use curies::{
-    sources::{get_bioregistry_converter, get_go_converter},
-    Converter, Record,
-};
+use curies::{sources::get_bioregistry_converter, Converter, Record};
 use serde_json::Value;
 use std::{
     collections::{HashMap, HashSet},
@@ -23,14 +20,21 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
         uri_prefix: "http://purl.obolibrary.org/obo/".to_string(),
         prefix_synonyms: HashSet::from(["OBO".to_string()]),
         uri_prefix_synonyms: HashSet::from(["https://identifiers.org/obo/"].map(String::from)),
+        pattern: None,
+    };
+    let record3 = Record {
+        prefix: "wrongpattern".to_string(),
+        uri_prefix: "http://purl.obolibrary.org/wrongpattern/".to_string(),
+        prefix_synonyms: HashSet::new(),
+        uri_prefix_synonyms: HashSet::new(),
         pattern: Some("\\".to_string()), // Wrong pattern for test
     };
     assert!(format!("{}", record1).starts_with("Prefix: doid"));
     assert!(format!("{}", converter).starts_with("Converter contains"));
     converter.add_record(record1.clone())?;
     converter.add_record(record2)?;
-    converter.build();
-    assert_eq!(converter.len(), 2);
+    converter.add_record(record3)?;
+    assert_eq!(converter.len(), 3);
     assert!(!converter.is_empty());
 
     // Find Record by prefix or URI
@@ -66,6 +70,11 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
         "doid:1234"
     );
     assert_eq!(
+        converter.compress("http://purl.obolibrary.org/obo/1234")?,
+        "obo:1234"
+    );
+
+    assert_eq!(
         converter
             .compress_list(["http://wrong/1234", "https://identifiers.org/DOID/1234"].to_vec()),
         [None, Some("doid:1234".to_string())].to_vec()
@@ -96,23 +105,23 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
         .map_err(|e| assert!(e.to_string().starts_with("Invalid CURIE")))
         .is_err());
     assert!(converter.find_by_uri_prefix("wrong").is_err());
-    assert!(converter.expand("obo:1234").is_err());
-    let record3 = Record {
+    assert!(converter.expand("wrongpattern:1234").is_err());
+    let record4 = Record {
         prefix: "wrong".to_string(),
         uri_prefix: "http://wrong.org/".to_string(),
         prefix_synonyms: HashSet::new(),
         uri_prefix_synonyms: HashSet::from(["https://identifiers.org/obo/"].map(String::from)),
         pattern: None,
     };
-    assert!(converter.add_record(record3).is_err());
-    let record4 = Record {
+    assert!(converter.add_record(record4).is_err());
+    let record5 = Record {
         prefix: "wrong".to_string(),
         uri_prefix: "http://wrong.org/".to_string(),
         prefix_synonyms: HashSet::from(["OBO".to_string()]),
         uri_prefix_synonyms: HashSet::new(),
         pattern: None,
     };
-    assert!(converter.add_record(record4).is_err());
+    assert!(converter.add_record(record5).is_err());
     Ok(())
 }
 
@@ -135,6 +144,10 @@ async fn from_prefix_map_converter() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(
         converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?,
         "DOID:1234"
+    );
+    assert_eq!(
+        converter.compress("http://purl.obolibrary.org/obo/1234")?,
+        "OBO:1234"
     );
     assert!(Converter::from_jsonld(prefix_map).await.is_err());
     let prefix_map: HashMap<String, Value> = HashMap::new();
@@ -214,10 +227,9 @@ async fn from_converter_errors() -> Result<(), Box<dyn std::error::Error>> {
 
 #[tokio::test]
 async fn chain_converters() -> Result<(), Box<dyn std::error::Error>> {
-    let mut converter = Converter::chain(vec![
+    let converter = Converter::chain(vec![
         get_bioregistry_converter().await?,
         Converter::from_extended_prefix_map(Path::new("tests/resources/extended_map.json")).await?,
-        // get_go_converter().await?,
     ])?;
     assert_eq!(
         converter.compress("http://purl.obolibrary.org/obo/SPECIAL_DOID_1234")?,
@@ -228,6 +240,6 @@ async fn chain_converters() -> Result<(), Box<dyn std::error::Error>> {
         "http://purl.obolibrary.org/obo/GO_1234567"
     );
     assert!(Converter::chain(vec![]).is_err());
-    assert!(converter.delete_record("Wrong").is_err());
+    // assert!(converter.delete_record("Wrong").is_err());
     Ok(())
 }

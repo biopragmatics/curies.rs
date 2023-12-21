@@ -64,7 +64,7 @@ cd curies.rs
 git checkout -b add-my-contribution
 ```
 
-###  🧪 Run tests
+### 🧪 Run tests
 
 Run tests for all packages:
 
@@ -84,7 +84,7 @@ Run a specific test:
 cargo test new_empty_converter -- --nocapture
 ```
 
-If tests panic without telling on which test it failed:
+If tests panic without telling on which test it failed, use:
 
 ```bash
 cargo test -- --test-threads=1
@@ -93,7 +93,7 @@ cargo test -- --test-threads=1
 Test the `curies` crate with code coverage:
 
 ```bash
-cargo tarpaulin -p curies --out html
+./scripts/cov.sh
 ```
 
 ### 🐍 Run python
@@ -113,7 +113,7 @@ python -m pytest python/tests/
 
 ### 🟨 Run JavaScript
 
-Build the npm package:
+Build the npm package, and run the TypeScript tests in a NodeJS environment:
 
 ```bash
 ./scripts/build-js.py
@@ -125,7 +125,7 @@ Start a web server:
 python -m http.server 3000 --directory ./js
 ```
 
-Open [localhost:3000](http://localhost:3000) in your web browser.
+Open [localhost:3000](http://localhost:3000) in your web browser to check the browser version.
 
 ### ✨ Format
 
