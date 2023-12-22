@@ -52,7 +52,7 @@ pip install maturin
 # Install rust dev tools
 rustup update
 rustup component add rustfmt clippy
-cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish cargo-make
+cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish cargo-deny
 ```
 
 ### 📥️ Clone the repository
@@ -151,6 +151,14 @@ Build and serve:
 
 ```bash
 ./scripts/docs-serve.sh
+```
+
+### ️⛓️ Check supply chain
+
+Check the dependency supply chain, only accept dependencies with OSI or FSF approved licenses.
+
+```bash
+cargo deny check
 ```
 
 ### 🏷️ New release
