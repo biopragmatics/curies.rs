@@ -88,8 +88,7 @@ impl fmt::Display for Record {
 pub struct Converter {
     records: Vec<Arc<Record>>,
     prefix_map: HashMap<String, Arc<Record>>,
-    uri_map: HashMap<String, Arc<Record>>,
-    trie: Trie<char, Arc<Record>>,
+    trie: Trie<u8, Arc<Record>>,
     delimiter: String,
 }
 
@@ -108,9 +107,7 @@ impl Converter {
         Converter {
             records: Vec::new(),
             prefix_map: HashMap::new(),
-            uri_map: HashMap::new(),
-            // trie: TrieBuilder::new().build(),
-            trie: Trie::<char, Arc<Record>>::new(),
+            trie: Trie::<u8, Arc<Record>>::new(),
             delimiter: delimiter.to_string(),
         }
     }
@@ -210,7 +207,7 @@ impl Converter {
         if self.prefix_map.contains_key(&rec.prefix) {
             return Err(CuriesError::DuplicateRecord(rec.prefix.clone()));
         }
-        if self.uri_map.contains_key(&rec.uri_prefix) {
+        if self.trie.contains_key(rec.uri_prefix.bytes()) {
             return Err(CuriesError::DuplicateRecord(rec.uri_prefix.clone()));
         }
         // Check if any of the synonyms are already present in the maps
@@ -220,7 +217,7 @@ impl Converter {
             }
         }
         for uri_prefix in &rec.uri_prefix_synonyms {
-            if self.uri_map.contains_key(uri_prefix) {
+            if self.trie.contains_key(uri_prefix.bytes()) {
                 return Err(CuriesError::DuplicateRecord(uri_prefix.clone()));
             }
         }
@@ -229,12 +226,10 @@ impl Converter {
         for prefix in &rec.prefix_synonyms {
             self.prefix_map.insert(prefix.clone(), rec.clone());
         }
-        self.uri_map.insert(rec.uri_prefix.clone(), rec.clone());
         self.trie
-            .insert(rec.uri_prefix.clone().chars(), rec.clone());
+            .insert(rec.uri_prefix.clone().bytes(), rec.clone());
         for uri_prefix in &rec.uri_prefix_synonyms {
-            self.uri_map.insert(uri_prefix.clone(), rec.clone());
-            self.trie.insert(uri_prefix.chars(), rec.clone());
+            self.trie.insert(uri_prefix.bytes(), rec.clone());
         }
         Ok(())
     }
@@ -330,27 +325,23 @@ impl Converter {
         }
         // Update the maps and trie
         self.prefix_map.insert(rec.prefix.clone(), rec.clone());
-        self.uri_map.insert(rec.uri_prefix.clone(), rec.clone());
         for prefix in &rec.prefix_synonyms {
             self.prefix_map.insert(prefix.clone(), rec.clone());
         }
-        for uri_prefix in &rec.uri_prefix_synonyms {
-            self.uri_map.insert(uri_prefix.clone(), rec.clone());
-        }
         if self
             .trie
-            .set_value(rec.uri_prefix.chars(), rec.clone())
+            .set_value(rec.uri_prefix.bytes(), rec.clone())
             .is_err()
         {
-            self.trie.insert(rec.uri_prefix.chars(), rec.clone());
+            self.trie.insert(rec.uri_prefix.bytes(), rec.clone());
         }
         for uri_prefix in &rec.uri_prefix_synonyms {
             if self
                 .trie
-                .set_value(uri_prefix.chars(), rec.clone())
+                .set_value(uri_prefix.bytes(), rec.clone())
                 .is_err()
             {
-                self.trie.insert(uri_prefix.chars(), rec.clone());
+                self.trie.insert(uri_prefix.bytes(), rec.clone());
             }
         }
         Ok(())
@@ -366,7 +357,7 @@ impl Converter {
 
     /// Find corresponding CURIE `Record` given a URI prefix
     pub fn find_by_uri_prefix(&self, uri_prefix: &str) -> Result<&Arc<Record>, CuriesError> {
-        match self.uri_map.get(uri_prefix) {
+        match self.trie.get(uri_prefix.bytes()) {
             Some(record) => Ok(record),
             None => Err(CuriesError::NotFound(uri_prefix.to_string())),
         }
@@ -374,7 +365,7 @@ impl Converter {
 
     /// Find corresponding CURIE `Record` given a complete URI
     pub fn find_by_uri(&self, uri: &str) -> Result<Arc<Record>, CuriesError> {
-        match self.trie.find_longest_prefix(uri.chars()) {
+        match self.trie.find_longest_prefix(uri.bytes()) {
             Some(rec) => Ok(rec),
             None => Err(CuriesError::NotFound(uri.to_string())),
         }
