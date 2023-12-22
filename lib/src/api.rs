@@ -9,7 +9,6 @@ use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::sync::Arc;
-// use trie_rs::{Trie, TrieBuilder};
 
 /// A CURIE `Record`, containing its prefixes and URI prefixes,
 /// used by `Converters` to resolve CURIEs and URIs.
@@ -225,7 +224,6 @@ impl Converter {
                 return Err(CuriesError::DuplicateRecord(uri_prefix.clone()));
             }
         }
-
         self.records.push(rec.clone());
         self.prefix_map.insert(rec.prefix.clone(), rec.clone());
         for prefix in &rec.prefix_synonyms {
@@ -310,15 +308,17 @@ impl Converter {
         Ok(base_converter)
     }
 
-    /// Update a `Record` in the `Converter`.
+    /// Update a `Record` in the `Converter` by adding its new prefixes and URI prefixes to the maps
     ///
     /// ```
     /// use curies::{Converter, Record};
     ///
     /// let mut converter = Converter::default();
-    /// let record = Record::new("doid", "http://purl.obolibrary.org/obo/DOID_");
-    /// converter.add_record(record.clone()).unwrap();
+    /// converter.add_record(Record::new("doid", "http://purl.obolibrary.org/obo/DOID_")).unwrap();
+    /// let record = Record::new("doid", "https://identifiers.org/doid:");
+    /// let record2 = Record::new("notthere", "http://notthere");
     /// assert!(converter.update_record(record).is_ok());
+    /// assert!(converter.update_record(record2).is_err());
     /// ```
     pub fn update_record(&mut self, record: Record) -> Result<(), CuriesError> {
         let rec = Arc::new(record);
@@ -344,7 +344,6 @@ impl Converter {
         {
             self.trie.insert(rec.uri_prefix.chars(), rec.clone());
         }
-
         for uri_prefix in &rec.uri_prefix_synonyms {
             if self
                 .trie
@@ -375,13 +374,6 @@ impl Converter {
 
     /// Find corresponding CURIE `Record` given a complete URI
     pub fn find_by_uri(&self, uri: &str) -> Result<Arc<Record>, CuriesError> {
-        // let matching_uris = self.trie.common_prefix_search(uri);
-        // println!("{:?}", matching_uris);
-        // let utf8_uri = match matching_uris.last() {
-        //     Some(u) => Ok(u),
-        //     None => Err(CuriesError::NotFound(uri.to_string())),
-        // };
-        // self.find_by_uri_prefix(std::str::from_utf8(utf8_uri?)?)
         match self.trie.find_longest_prefix(uri.chars()) {
             Some(rec) => Ok(rec),
             None => Err(CuriesError::NotFound(uri.to_string())),
