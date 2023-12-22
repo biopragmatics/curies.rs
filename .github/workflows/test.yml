@@ -14,9 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: rustup update && rustup component add clippy rustfmt
+      - run: rustup update && rustup component add clippy rustfmt && cargo install cargo-deny
       - run: cargo fmt -- --check
       - run: cargo clippy --all --all-targets --all-features
+      - run: cargo deny check
 
   test:
     name: 🧪 Tests
