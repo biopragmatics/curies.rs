@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Idiomatic conversion between URIs and compact URIs (CURIEs)"
 readme = "README.md"

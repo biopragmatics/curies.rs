@@ -16,7 +16,7 @@ name = "curies_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-curies = { version = "0.1.0", path = "../lib" }
+curies = { version = "0.1.1", path = "../lib" }
 pyo3 = { version = "0.20", features = ["extension-module"] }
 pythonize = "0.20"
 serde = { version = "1.0" }

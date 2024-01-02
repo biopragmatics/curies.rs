@@ -10,7 +10,6 @@ fi
 new_version=$1
 files=(
     "lib/Cargo.toml"
-    "cli/Cargo.toml"
     "python/Cargo.toml"
     "js/Cargo.toml"
 )

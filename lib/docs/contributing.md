@@ -182,7 +182,7 @@ for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKE
 3. Bump the version in the `Cargo.toml` file in folders `lib`, `python`, and `js`:
 
    ```bash
-   ./scripts/bump.sh 0.2.1
+   ./scripts/bump.sh 0.1.2
    ```
 
 4. Commit, push, and **create a new release on GitHub**.
