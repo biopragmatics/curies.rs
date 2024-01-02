@@ -163,27 +163,29 @@ cargo deny check
 
 ### 🏷️ New release
 
-Publishing artifacts will be done by the `build.yml` workflow, make sure you have set the following tokens as secrets for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`
+Publishing artifacts will be done by the `build.yml` workflow, make sure you have set the following tokens as secrets
+for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`
 
-Install dependency:
+1. Install dependency:
 
-```bash
-cargo install cargo-outdated
-```
+   ```bash
+   cargo install cargo-outdated
+   ```
 
-1. Make sure dependencies have been updated:
+2. Make sure dependencies have been updated:
 
    ```bash
    cargo update
    cargo outdated
    ```
 
-2. Bump the version in the `Cargo.toml` file in folders `lib`, `python`, and `js`:
+3. Bump the version in the `Cargo.toml` file in folders `lib`, `python`, and `js`:
 
    ```bash
-   ./scripts/bump.sh 0.0.2
+   ./scripts/bump.sh 0.2.1
    ```
 
-3. Commit, push, and **create a new release on GitHub**.
+4. Commit, push, and **create a new release on GitHub**.
 
-4. The `build.yml` workflow will automatically build artifacts (pip wheel, npm package), add them to the new release, and publish to public registries (crates.io, PyPI, NPM).
+5. The `build.yml` workflow will automatically build artifacts (pip wheel, npm package), add them to the new release,
+   and publish to public registries (crates.io, PyPI, NPM).
