@@ -11,6 +11,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Idiomatic conversion between URIs and compact URIs (CURIEs)"
 readme = "README.md"
+license = "MIT"
 license-file = "LICENSE"
 keywords = ["semantic-web", "linked-data", "linked-open-data"]
 categories = ["science", "encoding"]
