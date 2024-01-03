@@ -3,11 +3,26 @@
 </h1>
 
 <p align="center">
+    <a href="https://crates.io/crates/curies">
+        <img alt="crates.io" src="https://img.shields.io/crates/v/curies.svg" />
+    </a>
+    <a href="https://www.npmjs.com/package/@biopragmatics/curies">
+        <img alt="npm" src="https://img.shields.io/npm/v/@biopragmatics/curies" />
+    </a>
+    <a href="https://pypi.org/project/curies-rs">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/curies-rs" />
+    </a>
+</p>
+
+<p align="center">
     <a href="https://github.com/biopragmatics/curies.rs/actions/workflows/test.yml">
         <img alt="Test" src="https://github.com/biopragmatics/curies.rs/actions/workflows/test.yml/badge.svg" />
     </a>
     <a href="https://github.com/biopragmatics/curies.rs/actions/workflows/build.yml">
         <img alt="Build" src="https://github.com/biopragmatics/curies.rs/actions/workflows/build.yml/badge.svg" />
+    </a>
+    <a href="https://docs.rs/curies">
+        <img alt="crates" src="https://docs.rs/curies/badge.svg" />
     </a>
     <a href="https://deps.rs/repo/github/biopragmatics/curies.rs">
         <img src="https://deps.rs/repo/github/biopragmatics/curies.rs/status.svg" alt="Dependency status" />

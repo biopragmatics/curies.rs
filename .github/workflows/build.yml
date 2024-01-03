@@ -21,7 +21,7 @@ jobs:
       - name: Install wasm-pack for JS
         run: cargo install wasm-pack
 
-      - name: Setup node for JS
+      - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
           node-version: 20
@@ -149,12 +149,12 @@ jobs:
         with:
           name: curies_wheel_universal2_mac
           path: target/wheels/*.whl
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
-          packages-dir: target/wheels
+      - name: Publish to PyPI
         if: github.event_name == 'release'
+        run: pip install twine && twine upload target/wheels/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
 
   wheel_windows:
@@ -178,9 +178,9 @@ jobs:
         with:
           name: curies_wheel_x86_64_windows
           path: target/wheels/*.whl
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
-          packages-dir: target/wheels
+      - name: Publish to PyPI
         if: github.event_name == 'release'
+        run: pip install twine && twine upload target/wheels/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
