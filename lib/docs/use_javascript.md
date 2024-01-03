@@ -10,13 +10,17 @@ Install the `npm` package (use `yarn` or `pnpm` if you prefer) to use it from yo
 
 ```bash
 npm install @biopragmatics/curies
+# or
+pnpm add @biopragmatics/curies
+# or
+yarn add @biopragmatics/curies
 ```
 
 ## 🟢 Use it in a NodeJS environment
 
 There are multiple methods available for creating or importing converters:
 
-```ts
+```javascript
 import {Record, Converter, getOboConverter, getBioregistryConverter} from "@biopragmatics/curies";
 
 async function main() {

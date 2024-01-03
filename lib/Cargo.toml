@@ -4,7 +4,6 @@ version.workspace = true
 edition.workspace = true
 description.workspace = true
 readme.workspace = true
-license.workspace = true
 license-file.workspace = true
 keywords.workspace = true
 categories.workspace = true

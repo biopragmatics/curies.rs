@@ -364,7 +364,7 @@ impl Converter {
     }
 
     /// Find corresponding CURIE `Record` given a complete URI
-    pub fn find_by_uri(&self, uri: &str) -> Result<Arc<Record>, CuriesError> {
+    pub fn find_by_uri(&self, uri: &str) -> Result<&Arc<Record>, CuriesError> {
         match self.trie.find_longest_prefix(uri.bytes()) {
             Some(rec) => Ok(rec),
             None => Err(CuriesError::NotFound(uri.to_string())),
@@ -399,7 +399,7 @@ impl Converter {
                     .find_map(|synonym| uri.strip_prefix(synonym))
             })
             .ok_or_else(|| CuriesError::NotFound(uri.to_string()))?;
-        self.validate_id(id, &record)?;
+        self.validate_id(id, record)?;
         Ok(format!("{}{}{}", &record.prefix, self.delimiter, id))
     }
 

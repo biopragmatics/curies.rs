@@ -7,6 +7,7 @@
 You can use the Rust crate to work with CURIEs: import converters, compress URIs, expand CURIEs.
 
 ```rust
+extern crate curies;
 use curies::{Converter, Record, sources::get_bioregistry_converter};
 use std::collections::HashSet;
 
@@ -48,6 +49,7 @@ rt.block_on(async {
 You can also build a `Converter` from scratch:
 
 ```rust
+extern crate curies;
 use curies::{Converter, Record};
 use std::collections::HashSet;
 
