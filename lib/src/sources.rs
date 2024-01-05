@@ -32,7 +32,7 @@ use crate::{error::CuriesError, Converter};
 /// assert!(unregistered_curie.is_err());
 /// ```
 pub async fn get_obo_converter() -> Result<Converter, CuriesError> {
-    Converter::from_jsonld("http://purl.obolibrary.org/meta/obo_context.jsonld").await
+    Converter::from_jsonld("https://purl.obolibrary.org/meta/obo_context.jsonld").await
 }
 
 /// Get the Prefix Commons-maintained [Monarch Initiative
