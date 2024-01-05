@@ -82,7 +82,7 @@ You can easily import the NPM package from a CDN, and work with `curies` from a 
     <p id="expanded"></p>
 
     <script type="module">
-      import init, { Record, Converter, getOboConverter } from "./pkg/web.js";
+      import init, { Record, Converter, getOboConverter } from "https://unpkg.com/@biopragmatics/curies";
 
       async function main() {
         await init();
