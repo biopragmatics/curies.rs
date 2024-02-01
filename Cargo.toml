@@ -4,6 +4,7 @@ members = [
     "lib",
     "js",
     "python",
+    "r/src/rust",
 ]
 
 [workspace.package]

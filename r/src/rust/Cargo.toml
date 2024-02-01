@@ -1,0 +1,19 @@
+[package]
+name = 'curiesr'
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+readme.workspace = true
+license-file.workspace = true
+keywords.workspace = true
+homepage.workspace = true
+categories.workspace = true
+
+[lib]
+crate-type = [ 'staticlib' ]
+name = 'curiesr'
+
+[dependencies]
+extendr-api = '*'
+curies = { version = "0.1.1", path = "../../../lib" }
+tokio = { version = "1.34", features = ["rt-multi-thread"] }
