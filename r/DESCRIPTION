@@ -1,14 +1,14 @@
 Package: curiesr
-Title: Minimal Example of Calling Rust from R
+Title: Idiomatic conversion between URIs and compact URIs (CURIEs)
 Version: 0.1.0
 Authors@R: c(
-    person("Andy", "Thomason", , "andy@andythomason.com", c("aut")),
-    person("Clause O.", "Wilke", , "wilke@austin.utexas.edu", c("aut", "cre"),
-      comment = c(ORCID = "0000-0002-7470-9261"))
+    person("Charles", "Tapley Hoyt", , "cthoyt@gmail.com", c("aut")),
+    person("Vincent", "Emonet", , "vincent.emonet@gmail.com", c("aut", "cre"),
+      comment = c(ORCID = "0000-0002-1501-1082"))
   )
 Description:
-  This is a template package to demonstrate how to call
-  Rust from R using the 'extendr-api' crate.
+  R package for the curies library:
+  idiomatic conversion between URIs and compact URIs (CURIEs)
 License: MIT + file LICENSE
 SystemRequirements: Rust tool chain w/ cargo, libclang/llvm-config
 Encoding: UTF-8
