@@ -53,7 +53,7 @@ impl ConverterR {
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
-    mod helloextendr;
+    mod curiesr;
     fn hello_world;
     impl ConverterR;
 }

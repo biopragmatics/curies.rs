@@ -4,7 +4,7 @@ https://cran.r-project.org/web/packages/rextendr/vignettes/package.html
 
 Library: https://github.com/extendr/extendr
 
-Complete example: https://github.com/extendr/helloextendr
+Complete example: https://github.com/extendr/curiesr
 
 Start R shell:
 
@@ -45,7 +45,7 @@ Load R package:
 devtools::load_all("./r")
 ```
 
-## helloextendr example
+## curiesr example
 
 Start R shell:
 
@@ -61,7 +61,7 @@ rextendr::document("r")
 
 After installation, the following should work:
 ```r
-library(helloextendr)
+library(curiesr)
 
 hello_world()
 #> [1] "Hello world!"
@@ -70,7 +70,7 @@ hello_world()
 The R code for our converter should look like this:
 
 ```r
-library(helloextendr)
+library(curiesr)
 converter <- ConverterR$new()
 curie <- converter$compress("http://purl.obolibrary.org/obo/DOID_1234")
 print(curie)

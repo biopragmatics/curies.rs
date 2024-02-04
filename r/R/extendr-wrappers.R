@@ -4,11 +4,11 @@
 
 #
 # This file was created with the following call:
-#   .Call("wrap__make_helloextendr_wrappers", use_symbols = TRUE, package_name = "helloextendr")
+#   .Call("wrap__make_curiesr_wrappers", use_symbols = TRUE, package_name = "curiesr")
 
 #' @docType package
 #' @usage NULL
-#' @useDynLib helloextendr, .registration = TRUE
+#' @useDynLib curiesr, .registration = TRUE
 NULL
 
 #' Return string `"Hello world!"` to R.
