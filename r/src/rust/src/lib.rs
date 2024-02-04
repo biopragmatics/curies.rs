@@ -1,6 +1,9 @@
+use std::collections::HashSet;
+
+use curies::Record;
 use extendr_api::prelude::*;
 
-use ::curies::Converter;
+use ::curies::{sources::get_bioregistry_converter, Converter};
 use tokio::runtime::Runtime;
 
 /// Return string `"Hello world!"` to R.
@@ -11,7 +14,7 @@ fn hello_world() -> &'static str {
 }
 
 pub struct ConverterR {
-    // pub converter: Converter,
+    converter: Converter,
     // Getting error when using the converter struct
     // "Error in `value[[3L]]()`: Failed to generate wrapper functions"
     pub name: String,
@@ -20,37 +23,35 @@ pub struct ConverterR {
 #[extendr]
 impl ConverterR {
     fn new() -> Result<Self> {
+        // Building from empty converter works
+        let mut converter = Converter::default();
+        let record1 = Record {
+            prefix: "doid".to_string(),
+            uri_prefix: "http://purl.obolibrary.org/obo/DOID_".to_string(),
+            prefix_synonyms: HashSet::from(["DOID".to_string()]),
+            uri_prefix_synonyms: HashSet::from(["https://identifiers.org/DOID/"].map(String::from)),
+            pattern: None,
+        };
+        // But import using the async function and rt.block_on fails to generate wrapper functions
+        // let converter = init_converter();
+        converter.add_record(record1).unwrap();
         Ok(Self {
-            // converter: Converter::default(),
+            converter,
             name: "".to_string(),
         })
-        // Handle errors:
-        // Converter::default()
-        //     .map(|converter| Self { converter })
-        //     .map_err(|e| PyErr::new::<PyException, _>(format!("{e}")))
     }
 
     fn compress(&self, uri: &str) -> String {
-        format!("{uri}{}", self.name)
+        self.converter.compress(uri).unwrap()
     }
-
-    // fn load_extended_prefix_map(data: &str) -> Result<Self> {
-    //     // Use a tokio runtime to wait on the async operation
-    //     let rt = Runtime::new().unwrap();
-    //     // map_err(|e| {
-    //     //     Error::msg(format!("Failed to create Tokio runtime: {e}"))
-    //     // })?;
-    //     let result = rt.block_on(async move {
-    //         Converter::from_extended_prefix_map(data).await.unwrap()
-    //         // .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
-    //     });
-    //     // result.map(|converter| Self { converter })
-    //     Ok(Self { converter: result })
-    // }
 }
 
-// Macro to generate exports.
-// This ensures exported functions are registered with R.
+fn init_converter() -> Converter {
+    let rt = Runtime::new().unwrap();
+    rt.block_on(async { get_bioregistry_converter().await.unwrap() })
+}
+
+// Macro to generate exports. This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod curiesr;
