@@ -1,1 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^tests/testthat/_snaps$
+^\.github$
+
 ^src/\.cargo$

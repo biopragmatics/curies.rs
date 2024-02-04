@@ -1,17 +1,13 @@
 [package]
-name = 'curiesr'
-version.workspace = true
-authors.workspace = true
-edition.workspace = true
-readme.workspace = true
+name = 'helloextendr'
+publish = false
+version = '0.3.0'
+edition = '2021'
 license-file.workspace = true
-keywords.workspace = true
-homepage.workspace = true
-categories.workspace = true
 
 [lib]
 crate-type = [ 'staticlib' ]
-name = 'curiesr'
+name = 'helloextendr'
 
 [dependencies]
 extendr-api = '*'

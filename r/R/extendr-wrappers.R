@@ -4,16 +4,28 @@
 
 #
 # This file was created with the following call:
-#   .Call("wrap__make_curiesr_wrappers", use_symbols = TRUE, package_name = "curiesr")
+#   .Call("wrap__make_helloextendr_wrappers", use_symbols = TRUE, package_name = "helloextendr")
 
 #' @docType package
 #' @usage NULL
-#' @useDynLib curiesr, .registration = TRUE
+#' @useDynLib helloextendr, .registration = TRUE
 NULL
 
 #' Return string `"Hello world!"` to R.
 #' @export
 hello_world <- function() .Call(wrap__hello_world)
+
+ConverterR <- new.env(parent = emptyenv())
+
+ConverterR$new <- function() .Call(wrap__ConverterR__new)
+
+ConverterR$compress <- function(uri) .Call(wrap__ConverterR__compress, self, uri)
+
+#' @export
+`$.ConverterR` <- function (self, name) { func <- ConverterR[[name]]; environment(func) <- environment(); func }
+
+#' @export
+`[[.ConverterR` <- `$.ConverterR`
 
 
 # nolint end

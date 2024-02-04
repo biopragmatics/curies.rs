@@ -1,4 +1,4 @@
 library(testthat)
-library(curiesr)
+library(helloextendr)
 
-test_check("curiesr")
+test_check("helloextendr")

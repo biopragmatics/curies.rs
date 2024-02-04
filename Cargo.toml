@@ -5,6 +5,7 @@ members = [
     "js",
     "python",
     "r/src/rust",
+    # "helloextendr/src/rust",
 ]
 
 [workspace.package]
