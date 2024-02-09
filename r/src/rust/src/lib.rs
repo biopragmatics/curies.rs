@@ -24,17 +24,17 @@ pub struct ConverterR {
 impl ConverterR {
     fn new() -> Result<Self> {
         // Building from empty converter works
-        let mut converter = Converter::default();
-        let record1 = Record {
-            prefix: "doid".to_string(),
-            uri_prefix: "http://purl.obolibrary.org/obo/DOID_".to_string(),
-            prefix_synonyms: HashSet::from(["DOID".to_string()]),
-            uri_prefix_synonyms: HashSet::from(["https://identifiers.org/DOID/"].map(String::from)),
-            pattern: None,
-        };
+        // let mut converter = Converter::default();
+        // let record1 = Record {
+        //     prefix: "doid".to_string(),
+        //     uri_prefix: "http://purl.obolibrary.org/obo/DOID_".to_string(),
+        //     prefix_synonyms: HashSet::from(["DOID".to_string()]),
+        //     uri_prefix_synonyms: HashSet::from(["https://identifiers.org/DOID/"].map(String::from)),
+        //     pattern: None,
+        // };
+        // converter.add_record(record1).unwrap();
         // But import using the async function and rt.block_on fails to generate wrapper functions
-        // let converter = init_converter();
-        converter.add_record(record1).unwrap();
+        let converter = init_converter();
         Ok(Self {
             converter,
             name: "".to_string(),
