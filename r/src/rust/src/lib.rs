@@ -1,6 +1,3 @@
-use std::collections::HashSet;
-
-use curies::Record;
 use extendr_api::prelude::*;
 
 use ::curies::{sources::get_bioregistry_converter, Converter};
