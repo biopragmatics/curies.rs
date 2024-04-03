@@ -158,7 +158,7 @@ impl Converter {
     /// use curies::{Converter, Record, error::CuriesError};
     ///
     /// fn test_from_jsonld() -> Result<(), CuriesError> {
-    ///     let converter = Converter::from_jsonld("http://purl.obolibrary.org/meta/obo_context.jsonld");
+    ///     let converter = Converter::from_jsonld("https://purl.obolibrary.org/meta/obo_context.jsonld");
     ///     Ok(())
     /// }
     /// ```
@@ -196,7 +196,7 @@ impl Converter {
     /// ```
     /// use curies::Converter;
     ///
-    /// let converter = Converter::from_extended_prefix_map("https://raw.github.com/biopragmatics/bioregistry/main/exports/contexts/bioregistry.epm.json");
+    /// let converter = Converter::from_extended_prefix_map("https://w3id.org/biopragmatics/bioregistry.epm.json");
     /// ```
     pub async fn from_extended_prefix_map<T: ExtendedPrefixMapSource>(
         prefix_map: T,

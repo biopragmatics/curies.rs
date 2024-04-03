@@ -2,7 +2,7 @@
 
 use crate::{error::CuriesError, Converter};
 
-/// Get the latest [OBO Foundry context](http://purl.obolibrary.org/meta/obo_context.jsonld).
+/// Get the latest [OBO Foundry context](https://purl.obolibrary.org/meta/obo_context.jsonld).
 ///
 /// The OBO Foundry context is a simple prefix map stored in a JSON-LD file.
 /// It contains OBO Foundry preferred prefixes and OBO PURL expansions,
@@ -127,5 +127,5 @@ pub async fn get_go_converter() -> Result<Converter, CuriesError> {
 /// assert_eq!(uri, "https://www.ncbi.nlm.nih.gov/gene/100010");
 /// ```
 pub async fn get_bioregistry_converter() -> Result<Converter, CuriesError> {
-    Converter::from_extended_prefix_map("https://raw.githubusercontent.com/biopragmatics/bioregistry/main/exports/contexts/bioregistry.epm.json").await
+    Converter::from_extended_prefix_map("https://w3id.org/biopragmatics/bioregistry.epm.json").await
 }
