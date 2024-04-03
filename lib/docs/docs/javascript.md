@@ -39,10 +39,10 @@ async function main() {
   }`);
 
   // Load from an extended prefix map (string or URI)
-  const converterFromUrl = await Converter.fromExtendedPrefixMap("https://raw.githubusercontent.com/biopragmatics/bioregistry/main/exports/contexts/bioregistry.epm.json")
+  const converterFromUrl = await Converter.fromExtendedPrefixMap("https://w3id.org/biopragmatics/bioregistry.epm.json")
 
   // Load from a JSON-LD context (string or URI)
-  const converterFromJsonld = await Converter.fromJsond("http://purl.obolibrary.org/meta/obo_context.jsonld");
+  const converterFromJsonld = await Converter.fromJsond("https://purl.obolibrary.org/meta/obo_context.jsonld");
 
   // Load from one of the predefined source
   const converterFromSource = await getBioregistryConverter();

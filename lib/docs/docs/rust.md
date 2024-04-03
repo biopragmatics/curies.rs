@@ -19,10 +19,10 @@ async fn usage_example() -> Result<(), Box<dyn std::error::Error>> {
 }"#).await?;
 
     // Load from an extended prefix map (string or URI)
-    let converterFromUrl = Converter::from_extended_prefix_map("https://raw.githubusercontent.com/biopragmatics/bioregistry/main/exports/contexts/bioregistry.epm.json").await?;
+    let converterFromUrl = Converter::from_extended_prefix_map("https://w3id.org/biopragmatics/bioregistry.epm.json").await?;
 
     // Load from a JSON-LD context (string or URI)
-    let converterFromJsonld = Converter::from_jsonld("http://purl.obolibrary.org/meta/obo_context.jsonld").await?;
+    let converterFromJsonld = Converter::from_jsonld("https://purl.obolibrary.org/meta/obo_context.jsonld").await?;
 
     // Load from one of the predefined source
     let converterFromSource = get_bioregistry_converter().await?;
