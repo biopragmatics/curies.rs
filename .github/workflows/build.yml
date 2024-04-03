@@ -118,7 +118,9 @@ jobs:
             interpreter: 3.8 3.9 3.10 3.11 3.12
           - os: windows
             target: aarch64
-            interpreter: 3.11 3.12
+            interpreter: "3.12"
+            # interpreter: 3.11 3.12
+          # NOTE: getting error `lld-link: error: could not open 'python311.lib': no such file or directory`
 
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
@@ -149,9 +151,9 @@ jobs:
           rust-toolchain: stable
           docker-options: -e CI
           working-directory: python
-        # env:
-        #   CFLAGS_aarch64_unknown_linux_gnu: -D__ARM_ARCH=8
-        #   # NOTE: ring linux aarch64 error: https://github.com/briansmith/ring/issues/1728
+        env:
+          CFLAGS_aarch64_unknown_linux_gnu: -D__ARM_ARCH=8
+          # NOTE: fix for ring linux aarch64 error: https://github.com/briansmith/ring/issues/1728
 
       - run: ${{ (matrix.os == 'windows' && 'dir') || 'ls -lh' }} python/dist/
       - run: twine check --strict python/dist/*
