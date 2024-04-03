@@ -120,7 +120,7 @@ extra:
     - icon: fontawesome/brands/npm
       link: https://www.npmjs.com/package/@biopragmatics/curies
     - icon: fontawesome/brands/r-project
-      link: https://cran.r-project.org/web/packages/curies.r
+      link: https://cran.r-project.org/web/packages/curies
     - icon: fontawesome/brands/github
       link: https://github.com/biopragmatics
     # - icon: fontawesome/brands/docker

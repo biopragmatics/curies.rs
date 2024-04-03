@@ -10,7 +10,7 @@ Whether you're a developer looking to work with CURIEs (e.g. expand or compress)
 
 ## ✨ CURIEs management
 
-- 📥 **Import converters** from JSON or JSON-LD context, with helper functions for popular converters, such as `get_obo_converter()`, or create a custom converter programmatically.
+- 📥 **Import converters** from JSON prefix maps or JSON-LD context, with helper functions for popular converters, such as `get_obo_converter()`, or create a custom converter programmatically.
 - 🔗 **Expand CURIEs** from their compressed form to URIs.
 - 🗜️ **Compress URIs** to CURIEs.
 
@@ -28,7 +28,7 @@ This library is packaged for easy use across various interfaces and languages:
 - 🦀 **Rust developers**: available as a Rust crate `curies`
 - 🐍 **Python programmers**: available as a Python pip package `curies-rs`
 - 🌐 **Web developers**: available as a NPM package `@biopragmatics/curies`, compiled to [WebAssembly](https://webassembly.org/), for browser integrations with JavaScript, or NodeJS.
-- 📈 **R data scientists**: soon available as a R package `curies.r`
+- 📈 **R data scientists**: soon available as a R package `curies`
 
 ## ⚔️ Cross-platform support
 

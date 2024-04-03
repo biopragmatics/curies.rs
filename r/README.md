@@ -68,7 +68,8 @@ rextendr::document("r")
 After installation, the following should work:
 
 ```r
-library(curiesr)
+library(curies)
+
 converter <- Converter$new()
 curie <- converter$compress("http://purl.obolibrary.org/obo/DOID_1234")
 print(curie)

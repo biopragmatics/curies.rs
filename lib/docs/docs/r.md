@@ -21,7 +21,7 @@ Rscript -e 'rextendr::document("./r")'
 Initialize a converter, then use it to `compress` URIs to CURIEs, or `expand` CURIEs to URIs:
 
 ```r title="curies_conversion.R"
-library(curiesr)
+library(curies)
 
 converter <- Converter$new()
 

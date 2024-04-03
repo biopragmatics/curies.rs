@@ -143,14 +143,16 @@ impl ConverterPy {
 
     /// Expand a list of CURIEs
     #[pyo3(text_signature = "($self, curies)")]
-    fn expand_list(&self, curies: Vec<&str>) -> Vec<Option<String>> {
-        self.converter.expand_list(curies)
+    fn expand_list(&self, curies: Vec<String>) -> Vec<Option<String>> {
+        self.converter
+            .expand_list(curies.iter().map(|s| s.as_str()).collect())
     }
 
     /// Compress a list of URIs
     #[pyo3(text_signature = "($self, uris)")]
-    fn compress_list(&self, uris: Vec<&str>) -> Vec<Option<String>> {
-        self.converter.compress_list(uris)
+    fn compress_list(&self, uris: Vec<String>) -> Vec<Option<String>> {
+        self.converter
+            .compress_list(uris.iter().map(|s| s.as_str()).collect())
     }
 
     /// Chain with another `Converter`
