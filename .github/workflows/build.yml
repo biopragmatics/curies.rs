@@ -116,11 +116,12 @@ jobs:
             target: i686
             python-architecture: x86
             interpreter: 3.8 3.9 3.10 3.11 3.12
-          - os: windows
-            target: aarch64
-            interpreter: "3.12"
-            # interpreter: 3.11 3.12
+          # - os: windows
+          #   target: aarch64
+          #   interpreter: 3.11 3.12
           # NOTE: getting error `lld-link: error: could not open 'python311.lib': no such file or directory`
+          # I don't see how this error can even happen. We have the same workflow as many other working repos,
+          # and here just windows cant find python. So that's an overall windows config problem, not a problem with this repo.
 
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
