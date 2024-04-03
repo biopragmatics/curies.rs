@@ -4,8 +4,8 @@ use crate::error::CuriesError;
 use crate::fetch::{ExtendedPrefixMapSource, PrefixMapSource};
 use ptrie::Trie;
 use regex::Regex;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde::{Deserialize, Serialize, Serializer};
+use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::sync::Arc;
@@ -90,6 +90,16 @@ pub struct Converter {
     prefix_map: HashMap<String, Arc<Record>>,
     trie: Trie<u8, Arc<Record>>,
     delimiter: String,
+}
+
+impl Serialize for Converter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let records: Vec<&Record> = self.records.iter().map(|r| &**r).collect();
+        records.serialize(serializer)
+    }
 }
 
 impl Converter {
@@ -235,8 +245,59 @@ impl Converter {
     }
 
     /// Add a CURIE prefix and its prefix URI to the `Converter`
-    pub fn add_curie(&mut self, prefix: &str, uri_prefix: &str) -> Result<(), CuriesError> {
+    pub fn add_prefix(&mut self, prefix: &str, uri_prefix: &str) -> Result<(), CuriesError> {
         self.add_record(Record::new(prefix, uri_prefix))
+    }
+
+    /// Get all prefixes in the `Converter` as a list
+    pub fn get_prefixes(&self, include_synonyms: bool) -> Vec<String> {
+        if include_synonyms {
+            self.prefix_map.keys().cloned().collect()
+        } else {
+            self.records.iter().map(|r| r.prefix.clone()).collect()
+        }
+    }
+
+    /// Get all URI prefixes in the `Converter` as a list
+    pub fn get_uri_prefixes(&self, include_synonyms: bool) -> Vec<String> {
+        if include_synonyms {
+            let mut prefixes: Vec<String> = Vec::new();
+            for record in &self.records {
+                prefixes.push(record.uri_prefix.clone());
+                for synonym in &record.uri_prefix_synonyms {
+                    prefixes.push(synonym.clone());
+                }
+            }
+            prefixes
+        } else {
+            self.records.iter().map(|r| r.uri_prefix.clone()).collect()
+        }
+    }
+
+    /// Write the extended prefix map as a JSON string
+    pub fn write_extended_prefix_map(&self) -> Result<String, CuriesError> {
+        Ok(serde_json::to_string(&self)?)
+    }
+
+    /// Write the prefix map as a HashMap where keys are prefixes and values are URI prefixes.
+    pub fn write_prefix_map(&self) -> HashMap<String, String> {
+        self.records
+            .iter()
+            .map(|record| (record.prefix.clone(), record.uri_prefix.clone()))
+            .collect()
+    }
+
+    /// Write the JSON-LD representation of the prefix map.
+    pub fn write_jsonld(&self) -> serde_json::Value {
+        let mut context = json!({});
+        for record in &self.records {
+            context[record.prefix.clone()] = record.uri_prefix.clone().into();
+            // TODO: do we add prefix synonyms to the context?
+            for synonym in &record.prefix_synonyms {
+                context[synonym.clone()] = record.uri_prefix.clone().into();
+            }
+        }
+        json!({"@context": context})
     }
 
     /// Chain multiple `Converters` into a single `Converter`. The first `Converter` in the list is used as the base.

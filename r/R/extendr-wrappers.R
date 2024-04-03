@@ -11,15 +11,13 @@
 #' @useDynLib curiesr, .registration = TRUE
 NULL
 
-#' Return string `"Hello world!"` to R.
-#' @export
-hello_world <- function() .Call(wrap__hello_world)
-
 ConverterR <- new.env(parent = emptyenv())
 
 ConverterR$new <- function() .Call(wrap__ConverterR__new)
 
 ConverterR$compress <- function(uri) .Call(wrap__ConverterR__compress, self, uri)
+
+ConverterR$expand <- function(curie) .Call(wrap__ConverterR__expand, self, curie)
 
 #' @export
 `$.ConverterR` <- function (self, name) { func <- ConverterR[[name]]; environment(func) <- environment(); func }

@@ -12,6 +12,7 @@ use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::future_to_promise;
 
+/// JavaScript binding for a `Record` struct
 #[wasm_bindgen(js_name = Record )]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecordJs {
@@ -52,6 +53,7 @@ impl RecordJs {
     }
 }
 
+/// JavaScript binding for a `Converter` struct
 #[wasm_bindgen(js_name = Converter)]
 pub struct ConverterJs {
     converter: Converter,
@@ -62,6 +64,7 @@ pub struct ConverterJs {
 #[allow(unused_variables, clippy::inherent_to_string)]
 #[wasm_bindgen(js_class = Converter)]
 impl ConverterJs {
+    /// Create blank `Converter`
     #[wasm_bindgen(constructor)]
     pub fn new() -> Result<ConverterJs, JsValue> {
         Ok(Self {
@@ -69,6 +72,7 @@ impl ConverterJs {
         })
     }
 
+    /// Load `Converter` from prefix map JSON string or URL
     #[wasm_bindgen(static_method_of = ConverterJs, js_name = fromPrefixMap)]
     pub fn from_prefix_map(prefix_map: String) -> Promise {
         future_to_promise(async move {
@@ -79,6 +83,7 @@ impl ConverterJs {
         })
     }
 
+    /// Load `Converter` from JSON-LD string or URL
     #[wasm_bindgen(static_method_of = ConverterJs, js_name = fromJsonld)]
     pub fn from_jsonld(jsonld: String) -> Promise {
         future_to_promise(async move {
@@ -89,6 +94,7 @@ impl ConverterJs {
         })
     }
 
+    /// Load `Converter` from extended prefix map JSON string or URL
     #[wasm_bindgen(static_method_of = ConverterJs, js_name = fromExtendedPrefixMap)]
     pub fn from_extended_prefix_map(prefix_map: String) -> Promise {
         future_to_promise(async move {
@@ -99,6 +105,7 @@ impl ConverterJs {
         })
     }
 
+    /// Add `Record` to the `Converter`
     #[wasm_bindgen(js_name = addRecord)]
     pub fn add_record(&mut self, record: RecordJs) -> Result<(), JsValue> {
         self.converter
@@ -106,31 +113,37 @@ impl ConverterJs {
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
+    /// Add a CURIE as `Record` to the `Converter`
     #[wasm_bindgen(js_name = addCurie)]
-    pub fn add_curie(&mut self, prefix: &str, uri_prefix: &str) -> Result<(), JsValue> {
+    pub fn add_prefix(&mut self, prefix: &str, uri_prefix: &str) -> Result<(), JsValue> {
         self.converter
-            .add_curie(prefix, uri_prefix)
+            .add_prefix(prefix, uri_prefix)
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
+    /// Chain with another `Converter`
     pub fn chain(&self, converter: &ConverterJs) -> Result<ConverterJs, JsValue> {
         Converter::chain(vec![self.converter.clone(), converter.converter.clone()])
             .map(|converter| ConverterJs { converter })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
+    /// Expand a CURIE to URI
     pub fn expand(&self, curie: String) -> Result<String, JsValue> {
         self.converter
             .expand(&curie)
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
+    /// Compress a URI to CURIE
     pub fn compress(&self, uri: String) -> Result<String, JsValue> {
         self.converter
             .compress(&uri)
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
+    // TODO: Use Vec<String> instead of JsValue possible?
+    /// Expand a list of CURIEs to URIs
     #[wasm_bindgen(js_name = expandList)]
     pub fn expand_list(&self, curies: JsValue) -> Result<JsValue, JsValue> {
         let curies_vec: Vec<String> = serde_wasm_bindgen::from_value(curies)
@@ -144,6 +157,7 @@ impl ConverterJs {
         Ok(JsValue::from(js_array))
     }
 
+    /// Compress a list of URIs to CURIEs
     #[wasm_bindgen(js_name = compressList)]
     pub fn compress_list(&self, curies: JsValue) -> Result<JsValue, JsValue> {
         let curies_vec: Vec<String> = serde_wasm_bindgen::from_value(curies)

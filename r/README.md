@@ -1,10 +1,14 @@
 # CURIES R package
 
-https://cran.r-project.org/web/packages/rextendr/vignettes/package.html
+`rextendr`docs (to scaffold project with `extendr` bindings): https://cran.r-project.org/web/packages/rextendr/vignettes/package.html
 
-Library: https://github.com/extendr/extendr
+`extendr` library: https://github.com/extendr/extendr
 
-Complete example: https://github.com/extendr/curiesr
+`extendr` API docs: https://extendr.github.io/extendr/extendr_api
+
+Complete example: https://github.com/extendr/helloextendr
+
+## Install dependencies
 
 Start R shell:
 
@@ -27,6 +31,8 @@ Or install from GitHub:
 remotes::install_github("extendr/rextendr")
 ```
 
+## Build
+
 Compile:
 
 ```r
@@ -36,7 +42,7 @@ rextendr::document("./r")
 Run tests:
 
 ```r
-CMD check .
+library(testthat); test_dir("r/tests");
 ```
 
 Load R package:
@@ -55,19 +61,11 @@ R
 
 Compile and install:
 
-``` r
+```r
 rextendr::document("r")
 ```
 
 After installation, the following should work:
-```r
-library(curiesr)
-
-hello_world()
-#> [1] "Hello world!"
-```
-
-The R code for our converter should look like this:
 
 ```r
 library(curiesr)

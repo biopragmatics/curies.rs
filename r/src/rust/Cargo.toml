@@ -10,7 +10,6 @@ crate-type = [ 'staticlib' ]
 name = 'curiesr'
 
 [dependencies]
-# extendr-api = '*'
+curies.workspace = true
 extendr-api = '0.6.0'
-curies = { version = "0.1.1", path = "../../../lib" }
 tokio = { version = "1.34", features = ["rt-multi-thread"] }

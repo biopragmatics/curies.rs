@@ -46,7 +46,7 @@ rt.block_on(async {
 
 ## 🏗️ Build a converter
 
-You can also build a `Converter` from scratch:
+You can also build a `Converter` programmatically from `Record`:
 
 ```rust
 extern crate curies;

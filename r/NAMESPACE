@@ -2,5 +2,4 @@
 
 S3method("$",ConverterR)
 S3method("[[",ConverterR)
-export(hello_world)
 useDynLib(curiesr, .registration = TRUE)

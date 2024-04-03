@@ -3,17 +3,10 @@ use extendr_api::prelude::*;
 use ::curies::{sources::get_bioregistry_converter, Converter};
 use tokio::runtime::Runtime;
 
-/// Return string `"Hello world!"` to R.
+/// Converter struct for R
 /// @export
-#[extendr]
-fn hello_world() -> &'static str {
-    "Hello world!"
-}
-
 pub struct ConverterR {
     converter: Converter,
-    // Getting error when using the converter struct
-    // "Error in `value[[3L]]()`: Failed to generate wrapper functions"
     pub name: String,
 }
 
@@ -41,8 +34,13 @@ impl ConverterR {
     fn compress(&self, uri: &str) -> String {
         self.converter.compress(uri).unwrap()
     }
+
+    fn expand(&self, curie: &str) -> String {
+        self.converter.expand(curie).unwrap()
+    }
 }
 
+/// Initialize converter
 fn init_converter() -> Converter {
     let rt = Runtime::new().unwrap();
     rt.block_on(async { get_bioregistry_converter().await.unwrap() })
@@ -52,6 +50,13 @@ fn init_converter() -> Converter {
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod curiesr;
-    fn hello_world;
     impl ConverterR;
+    // fn hello_world;
 }
+
+// Return string `"Hello world!"` to R.
+// @export
+// #[extendr]
+// fn hello_world() -> &'static str {
+//     "Hello world!"
+// }

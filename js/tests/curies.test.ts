@@ -1,5 +1,5 @@
 import {describe, expect, test} from '@jest/globals';
-import {Record, Converter, getOboConverter, getBioregistryConverter} from "../pkg/node";
+import {Record, Converter, getOboConverter, getBioregistryConverter, getMonarchConverter, getGoConverter} from "../pkg/node";
 
 describe('Tests for the curies npm package', () => {
   // NOTE: `await init()` only needed in browser environment
@@ -99,6 +99,18 @@ describe('Tests for the curies npm package', () => {
     const converter = await getBioregistryConverter();
     expect(converter.compress("http://purl.obolibrary.org/obo/DOID_1234")).toBe("doid:1234");
     expect(converter.expand("doid:1234")).toBe("http://purl.obolibrary.org/obo/DOID_1234");
+  });
+
+  test('get GO converter', async () => {
+    const converter = await getGoConverter();
+    expect(converter.compress("http://identifiers.org/ncbigene/100010")).toBe("NCBIGene:100010");
+    expect(converter.expand("NCBIGene:100010")).toBe("http://identifiers.org/ncbigene/100010");
+  });
+
+  test('get Monarch converter', async () => {
+    const converter = await getMonarchConverter();
+    expect(converter.compress("http://purl.obolibrary.org/obo/CHEBI_24867")).toBe("CHEBI:24867");
+    expect(converter.expand("CHEBI:24867")).toBe("http://purl.obolibrary.org/obo/CHEBI_24867");
   });
 
   test('chain converters', async () => {

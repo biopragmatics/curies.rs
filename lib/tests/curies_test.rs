@@ -36,6 +36,15 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
     converter.add_record(record3)?;
     assert_eq!(converter.len(), 3);
     assert!(!converter.is_empty());
+    assert!(converter.get_prefixes(true).len() > converter.get_prefixes(false).len());
+    assert!(converter.get_uri_prefixes(true).len() > converter.get_uri_prefixes(false).len());
+    assert!(converter.write_extended_prefix_map()?.starts_with("[{"));
+    assert!(converter.write_prefix_map().len() == 3);
+    assert!(converter.write_jsonld()["@context"]
+        .to_string()
+        .starts_with("{"));
+    println!("{:?}", converter.write_jsonld());
+    // println!("{:?}", converter.write_extended_prefix_map());
 
     // Find Record by prefix or URI
     assert_eq!(converter.find_by_prefix("doid")?.prefix, "doid");
@@ -90,7 +99,7 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
 
     // Test wrong calls
     assert!(converter
-        .add_curie("doid", "http://purl.obolibrary.org/obo/DOID_")
+        .add_prefix("doid", "http://purl.obolibrary.org/obo/DOID_")
         .map_err(|e| assert!(e.to_string().starts_with("Duplicate record")))
         .is_err());
     assert!(converter

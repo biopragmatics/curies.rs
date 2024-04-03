@@ -1,4 +1,5 @@
-#![doc = include_str!("../docs/use_rust.md")]
+#![doc = include_str!("../docs/docs/index.md")]
+#![doc = include_str!("../docs/docs/rust.md")]
 // #![warn(missing_docs)]
 // #![doc(issue_tracker_base_url = "https://github.com/biopragmatics/curies.rs/issues")]
 

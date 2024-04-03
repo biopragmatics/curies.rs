@@ -17,7 +17,7 @@ repos:
     -   id: trailing-whitespace
         name: ✂️  Trim trailing whitespaces
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.16.25
+    rev: v1.19.0
     hooks:
     -   id: typos
         name: ✒️  Check typos
@@ -33,7 +33,7 @@ repos:
         pass_filenames: false
     -   id: deny
         name: ❌ Check dependencies
-        entry: cargo deny check
+        entry: cargo deny check licenses
         language: system
         pass_filenames: false
 ci:

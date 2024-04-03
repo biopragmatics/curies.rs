@@ -24,5 +24,9 @@ authors = [
   "Vincent Emonet <vincent.emonet@gmail.com>"
 ]
 
+[workspace.dependencies]
+curies = { version = "0.1.1", path = "./lib" }
+serde = { version = "1.0" }
+
 [profile.release]
 lto = true

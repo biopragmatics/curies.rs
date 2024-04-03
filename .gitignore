@@ -7,6 +7,7 @@ tarpaulin-report.html
 cobertura.xml
 benchmark.md
 hyperfine_*.deb
+/index.html
 
 # Python
 .venv
@@ -19,7 +20,11 @@ package-lock.json
 *.lock
 js/LICENSE
 
+# R
+*.rds
+
 # Docs
+lib/docs/dist
 /theme/
 mdbook-admonish.css
 
