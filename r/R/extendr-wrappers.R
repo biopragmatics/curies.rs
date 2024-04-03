@@ -4,26 +4,26 @@
 
 #
 # This file was created with the following call:
-#   .Call("wrap__make_curiesr_wrappers", use_symbols = TRUE, package_name = "curiesr")
+#   .Call("wrap__make_curies_wrappers", use_symbols = TRUE, package_name = "curies")
 
 #' @docType package
 #' @usage NULL
-#' @useDynLib curiesr, .registration = TRUE
+#' @useDynLib curies, .registration = TRUE
 NULL
 
-ConverterR <- new.env(parent = emptyenv())
+Converter <- new.env(parent = emptyenv())
 
-ConverterR$new <- function() .Call(wrap__ConverterR__new)
+Converter$new <- function() .Call(wrap__Converter__new)
 
-ConverterR$compress <- function(uri) .Call(wrap__ConverterR__compress, self, uri)
+Converter$compress <- function(uri) .Call(wrap__Converter__compress, self, uri)
 
-ConverterR$expand <- function(curie) .Call(wrap__ConverterR__expand, self, curie)
-
-#' @export
-`$.ConverterR` <- function (self, name) { func <- ConverterR[[name]]; environment(func) <- environment(); func }
+Converter$expand <- function(curie) .Call(wrap__Converter__expand, self, curie)
 
 #' @export
-`[[.ConverterR` <- `$.ConverterR`
+`$.Converter` <- function (self, name) { func <- Converter[[name]]; environment(func) <- environment(); func }
+
+#' @export
+`[[.Converter` <- `$.Converter`
 
 
 # nolint end

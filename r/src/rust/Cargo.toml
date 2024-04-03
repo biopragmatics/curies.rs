@@ -1,5 +1,5 @@
 [package]
-name = 'curiesr'
+name = 'curies-r'
 publish = false
 version = '0.3.0'
 edition = '2021'
@@ -7,7 +7,7 @@ license-file.workspace = true
 
 [lib]
 crate-type = [ 'staticlib' ]
-name = 'curiesr'
+name = 'curies'
 
 [dependencies]
 curies.workspace = true

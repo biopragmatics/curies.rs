@@ -69,7 +69,7 @@ After installation, the following should work:
 
 ```r
 library(curiesr)
-converter <- ConverterR$new()
+converter <- Converter$new()
 curie <- converter$compress("http://purl.obolibrary.org/obo/DOID_1234")
 print(curie)
 ```

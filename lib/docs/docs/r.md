@@ -23,7 +23,7 @@ Initialize a converter, then use it to `compress` URIs to CURIEs, or `expand` CU
 ```r title="curies_conversion.R"
 library(curiesr)
 
-converter <- ConverterR$new()
+converter <- Converter$new()
 
 curie <- converter$compress("http://purl.obolibrary.org/obo/DOID_1234")
 uri <- converter$expand("doid:1234")

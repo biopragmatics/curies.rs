@@ -1,4 +1,4 @@
-Package: curiesr
+Package: curies
 Title: Idiomatic conversion between URIs and compact URIs (CURIEs)
 Version: 0.1.0
 Authors@R: c(

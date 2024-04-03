@@ -1,17 +1,17 @@
 use extendr_api::prelude::*;
 
-use ::curies::{sources::get_bioregistry_converter, Converter};
+use ::curies::{sources::get_bioregistry_converter, Converter as RsConverter};
 use tokio::runtime::Runtime;
 
 /// Converter struct for R
 /// @export
-pub struct ConverterR {
-    converter: Converter,
+pub struct Converter {
+    converter: RsConverter,
     pub name: String,
 }
 
 #[extendr]
-impl ConverterR {
+impl Converter {
     fn new() -> Result<Self> {
         // Building from empty converter works
         // let mut converter = Converter::default();
@@ -41,16 +41,15 @@ impl ConverterR {
 }
 
 /// Initialize converter
-fn init_converter() -> Converter {
+fn init_converter() -> RsConverter {
     let rt = Runtime::new().unwrap();
     rt.block_on(async { get_bioregistry_converter().await.unwrap() })
 }
 
-// Macro to generate exports. This ensures exported functions are registered with R.
-// See corresponding C code in `entrypoint.c`.
+// Macro to generate exports. This ensures exported functions are registered with R. See corresponding C code in `entrypoint.c`.
 extendr_module! {
-    mod curiesr;
-    impl ConverterR;
+    mod curies;
+    impl Converter;
     // fn hello_world;
 }
 
