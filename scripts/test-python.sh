@@ -18,6 +18,8 @@ fi
 echo "Activating virtual environment"
 source .venv/bin/activate
 
+pip install -q -r python/requirements.txt
+
 cd python
 
 if [ "$SKIP_BUILD" = false ]; then

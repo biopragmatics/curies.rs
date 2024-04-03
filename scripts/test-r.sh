@@ -16,9 +16,8 @@ if [ "$INSTALL_DEPS" = true ]; then
     Rscript -e 'install.packages("usethis")'
     Rscript -e 'install.packages("devtools")'
     Rscript -e 'install.packages("testthat")'
-
-    # Rscript -e 'install.packages("rextendr")'
-    Rscript -e 'remotes::install_github("extendr/rextendr")'
+    Rscript -e 'install.packages("rextendr")'
+    # Rscript -e 'remotes::install_github("extendr/rextendr")'
 fi
 
 Rscript -e 'rextendr::document("./r"); library(testthat); test_dir("r/tests");'
