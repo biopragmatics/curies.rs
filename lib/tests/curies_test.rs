@@ -42,9 +42,11 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
     assert!(converter.write_prefix_map().len() == 3);
     assert!(converter.write_jsonld()["@context"]
         .to_string()
-        .starts_with("{"));
-    println!("{:?}", converter.write_jsonld());
+        .starts_with('{'));
+    assert!(converter.write_shacl()?.starts_with("PREFIX"));
     // println!("{:?}", converter.write_extended_prefix_map());
+    // println!("{:?}", converter.write_jsonld());
+    // println!("{:?}", converter.write_shacl());
 
     // Find Record by prefix or URI
     assert_eq!(converter.find_by_prefix("doid")?.prefix, "doid");

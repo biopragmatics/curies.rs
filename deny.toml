@@ -28,7 +28,8 @@ ignore = [
 
 # https://embarkstudios.github.io/cargo-deny/checks/licenses/cfg.html
 [licenses]
-unlicensed = "deny"
+# unlicensed = "deny"
+unlicensed = "warn" # ring license is not detected
 # See https://spdx.org/licenses/ for list of possible licenses
 allow = [
     #"MIT",

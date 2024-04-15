@@ -22,6 +22,14 @@ describe('Tests for the curies npm package', () => {
       "http://purl.obolibrary.org/obo/DOID_1234",
       "http://identifiers.org/DOID:1234"
     ])).toEqual(["OBO:1234", "DOID:1234", undefined]);
+    expect(converter.getPrefixes().length).toBe(2)
+    expect(converter.getUriPrefixes().length).toBe(2)
+
+    console.log(converter.writeExtendedPrefixMap())
+    expect(converter.writeExtendedPrefixMap().startsWith("[{")).toBe(true);
+    expect(converter.writeShacl().startsWith("PREFIX")).toBe(true);
+    expect(converter.writePrefixMap().length).toBeGreaterThan(10);
+    expect(converter.writeJsonld().length).toBeGreaterThan(10);
   });
 
   test('from prefix map', async () => {
@@ -54,6 +62,19 @@ describe('Tests for the curies npm package', () => {
     }`);
     expect(converter.compress("http://purl.obolibrary.org/obo/DOID_1234")).toBe("DOID:1234");
     expect(converter.expand("DOID:1234")).toBe("http://purl.obolibrary.org/obo/DOID_1234");
+  });
+
+  test('from SHACL', async () => {
+    const converter = await Converter.fromShacl(`@prefix sh: <http://www.w3.org/ns/shacl#> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    [
+      sh:declare
+        [ sh:prefix "dc" ; sh:namespace "http://purl.org/dc/elements/1.1/"^^xsd:anyURI  ],
+        [ sh:prefix "dcterms" ; sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI  ],
+        [ sh:prefix "foaf" ; sh:namespace "http://xmlns.com/foaf/0.1/"^^xsd:anyURI  ],
+        [ sh:prefix "xsd" ; sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI  ]
+    ] .`);
+    expect(converter.expand("foaf:name")).toBe("http://xmlns.com/foaf/0.1/name");
   });
 
   test('from extended prefix map', async () => {
@@ -99,6 +120,9 @@ describe('Tests for the curies npm package', () => {
     const converter = await getBioregistryConverter();
     expect(converter.compress("http://purl.obolibrary.org/obo/DOID_1234")).toBe("doid:1234");
     expect(converter.expand("doid:1234")).toBe("http://purl.obolibrary.org/obo/DOID_1234");
+    expect(converter.standardizePrefix("gomf")).toBe("go");
+    expect(converter.standardizeCurie("gomf:0032571")).toBe("go:0032571");
+    expect(converter.standardizeUri("http://amigo.geneontology.org/amigo/term/GO:0032571")).toBe("http://purl.obolibrary.org/obo/GO_0032571");
   });
 
   test('get GO converter', async () => {

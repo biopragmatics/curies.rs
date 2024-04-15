@@ -28,12 +28,21 @@ uri = converter.expand("DOID:1234")
 
 # Compress/expand a list
 curies = converter.compress_list(["http://purl.obolibrary.org/obo/DOID_1234"])
-uris = converter.expand_list(["DOID:1234"])
+uris = converter.expand_list(["DOID:1234", "doid:1235"])
+
+# Standardize prefix, CURIEs, and URIs using the preferred alternative
+assert converter.standardize_prefix("gomf") == "go"
+assert converter.standardize_curie("gomf:0032571") == "go:0032571"
+assert converter.standardize_uri("http://amigo.geneontology.org/amigo/term/GO:0032571") == "http://purl.obolibrary.org/obo/GO_0032571"
+
+# Get the list of prefixes or URI prefixes, argument include_synonyms default to False
+prefixes_without_syn = converter.get_prefixes()
+uri_prefixes_with_syn = converter.get_uri_prefixes(True)
 ```
 
-## 🌀 Converter initialization
+## 🌀 Load a converter
 
-There are many ways to initialize a CURIE/URI converter.
+There are many ways to load a CURIE/URI converter.
 
 ### 📦 Import a predefined converter
 
@@ -71,24 +80,14 @@ from curies_rs import get_monarch_converter
 converter = get_monarch_converter()
 ```
 
-###  📂 Load converter from prefix map
+###  📂 Load from file
 
 Converter can be loaded from a prefix map, an extended prefix map (which enables to provide more information for each prefix), or a JSON-LD context.
 
-For each function you can either provide the string to the prefix map JSON, or the URL to it.
+!!! tip "Support URL"
 
-#### Load from prefix map
+    For each `Converter.from_` function you can either provide the file content, or the URL to the file as string.
 
-```python
-from curies_rs import Converter
-
-prefix_map = """{
-    "GO": "http://purl.obolibrary.org/obo/GO_",
-    "DOID": "http://purl.obolibrary.org/obo/DOID_",
-    "OBO": "http://purl.obolibrary.org/obo/"
-}"""
-converter = Converter.from_prefix_map(prefix_map)
-```
 
 #### Load from extended prefix map
 
@@ -127,6 +126,21 @@ extended_pm = """[
 converter = Converter.from_extended_prefix_map(extended_pm)
 ```
 
+#### Load from prefix map
+
+A simple dictionary without synonyms information:
+
+```python
+from curies_rs import Converter
+
+prefix_map = """{
+    "GO": "http://purl.obolibrary.org/obo/GO_",
+    "DOID": "http://purl.obolibrary.org/obo/DOID_",
+    "OBO": "http://purl.obolibrary.org/obo/"
+}"""
+converter = Converter.from_prefix_map(prefix_map)
+```
+
 #### Load from JSON-LD context
 
 ```python
@@ -150,6 +164,23 @@ from curies_rs import Converter
 converter = Converter.from_jsonld("https://purl.obolibrary.org/meta/obo_context.jsonld")
 ```
 
+#### Load from SHACL prefixes definition
+
+```python
+from curies_rs import Converter
+
+shacl = """@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+[
+  sh:declare
+    [ sh:prefix "dc" ; sh:namespace "http://purl.org/dc/elements/1.1/"^^xsd:anyURI  ],
+    [ sh:prefix "dcterms" ; sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI  ],
+    [ sh:prefix "foaf" ; sh:namespace "http://xmlns.com/foaf/0.1/"^^xsd:anyURI  ],
+    [ sh:prefix "xsd" ; sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI  ]
+] ."""
+conv = Converter.from_shacl(shacl)
+```
+
 ### 🛠️ Build the converter programmatically
 
 Create an empty `Converter`, and populate it with `Record`:
@@ -158,12 +189,11 @@ Create an empty `Converter`, and populate it with `Record`:
 from curies_rs import Converter, Record
 
 rec1 = Record("doid", "http://purl.obolibrary.org/obo/DOID_", ["DOID"], ["https://identifiers.org/doid/"])
-rec2 = Record("obo", "http://purl.obolibrary.org/obo/")
 print(rec1.dict())
 
 converter = Converter()
 converter.add_record(rec1)
-converter.add_record(rec2)
+converter.add_prefix("obo", "http://purl.obolibrary.org/obo/")
 ```
 
 ### ⛓️ Chain converters
@@ -179,4 +209,19 @@ converter = (
     	.chain(get_monarch_converter())
 )
 print(len(converter))
+```
+
+## ✒️ Serialize a converter
+
+Output the converter prefix map as a string in different serialization format:
+
+```python
+from curies_rs import get_bioregistry_converter
+
+converter = get_bioregistry_converter()
+
+epm = converter.write_extended_prefix_map()
+pm = converter.write_prefix_map()
+jsonld = converter.write_jsonld()
+shacl = converter.write_shacl()
 ```

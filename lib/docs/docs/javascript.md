@@ -59,6 +59,21 @@ async function main() {
   // Expand and compress list of CURIEs and URIs
   const curies = converter.compressList(["http://purl.obolibrary.org/obo/DOID_1234"]);
   const uris = converter.expandList(["doid:1234"]);
+
+  // Standardize prefix, CURIEs, and URIs using the preferred alternative
+  console.log(converter.standardizePrefix("gomf"))
+  console.log(converter.standardizeCurie("gomf:0032571"))
+  console.log(converter.standardizeUri("http://amigo.geneontology.org/amigo/term/GO:0032571"))
+
+  // Get the list of prefixes or URI prefixes, argument include_synonyms default to False
+  const prefixes_without_syn = converter.getPrefixes()
+  const uri_prefixes_with_syn = converter.getUriPrefixes(true)
+
+  // Output the converter prefix map as a string in different serialization format
+  const epm = converter.writeExtendedPrefixMap()
+  const pm = converter.writePrefixMap()
+  const jsonld = converter.writeJsonld()
+  const shacl = converter.writeShacl()
 }
 main();
 ```

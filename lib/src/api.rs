@@ -1,11 +1,26 @@
 //! API for `Converter` and `Record`
 
 use crate::error::CuriesError;
-use crate::fetch::{ExtendedPrefixMapSource, PrefixMapSource};
+use crate::fetch::{ExtendedPrefixMapSource, PrefixMapSource, ShaclSource};
 use ptrie::Trie;
 use regex::Regex;
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::{json, Value};
+use sophia::api::dataset::Dataset as _;
+use sophia::api::graph::MutableGraph as _;
+use sophia::api::ns::{xsd, Namespace};
+use sophia::api::prefix::Prefix;
+use sophia::api::quad::Quad as _;
+use sophia::api::serializer::{Stringifier as _, TripleSerializer as _};
+use sophia::api::source::QuadSource as _;
+use sophia::api::term::matcher::Any;
+use sophia::api::term::BnodeId;
+use sophia::api::term::Term;
+use sophia::inmem::dataset::LightDataset;
+use sophia::inmem::graph::LightGraph;
+use sophia::iri::Iri;
+use sophia::turtle::parser::trig;
+use sophia::turtle::serializer::turtle::{TurtleConfig, TurtleSerializer};
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::sync::Arc;
@@ -136,7 +151,7 @@ impl Converter {
     /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
     /// let converter = rt.block_on(async {
     ///      Converter::from_prefix_map(prefix_map).await
-    /// }).expect("Failed to create the GO converter");
+    /// }).expect("Failed to create the converter");
     ///
     /// let curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234").unwrap();
     /// assert_eq!(curie, "DOID:1234");
@@ -162,8 +177,8 @@ impl Converter {
     ///     Ok(())
     /// }
     /// ```
-    pub async fn from_jsonld<T: PrefixMapSource>(data: T) -> Result<Self, CuriesError> {
-        let prefix_map = data.fetch().await?;
+    pub async fn from_jsonld<T: PrefixMapSource>(jsonld: T) -> Result<Self, CuriesError> {
+        let prefix_map = jsonld.fetch().await?;
         let mut converter = Converter::default();
         let context = match prefix_map.get("@context") {
             Some(Value::Object(map)) => map,
@@ -189,7 +204,7 @@ impl Converter {
     ///
     /// # Arguments
     ///
-    /// * `data` - The extended prefix map data, as URL, string, file, or `Vec<HashMap>`
+    /// * `prefix_map` - The extended prefix map data, as URL, string, file, or `Vec<HashMap>`
     ///
     /// # Examples
     ///
@@ -205,6 +220,57 @@ impl Converter {
         let mut converter = Converter::default();
         for record in records {
             converter.add_record(record)?;
+        }
+        Ok(converter)
+    }
+
+    /// Create a `Converter` from a SHACL shape prefixes definition
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - The SHACL shapes data, as URL, string, file, or `Vec<HashMap>`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use curies::{Converter, Record};
+    /// use std::collections::HashMap;
+    /// use tokio::{runtime};
+    ///
+    /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    /// let converter = rt.block_on(async {
+    ///      Converter::from_shacl("https://raw.githubusercontent.com/biopragmatics/bioregistry/main/exports/contexts/semweb.context.ttl").await
+    /// }).expect("Failed to create the converter");
+    ///
+    /// let uri = converter.expand("foaf:name").unwrap();
+    /// assert_eq!(uri, "http://xmlns.com/foaf/0.1/name");
+    /// ```
+    pub async fn from_shacl<T: ShaclSource>(shacl: T) -> Result<Self, CuriesError> {
+        let rdf_str = shacl.fetch().await?;
+        let mut converter = Converter::default();
+        // Parse the RDF string
+        let graph: LightDataset = trig::parse_str(&rdf_str)
+            .collect_quads()
+            .map_err(|e| CuriesError::InvalidFormat(format!("Error parsing TriG: {e}")))?;
+        let shacl_ns = Namespace::new("http://www.w3.org/ns/shacl#")?;
+        // Iterate over triples that match the SHACL prefix and namespace pattern
+        for q_prefix in graph.quads_matching(Any, [shacl_ns.get("prefix")?], Any, Any) {
+            for q_namespace in
+                graph.quads_matching([q_prefix?.s()], [shacl_ns.get("namespace")?], Any, Any)
+            {
+                converter.add_prefix(
+                    q_prefix?
+                        .o()
+                        .lexical_form()
+                        .ok_or(CuriesError::InvalidFormat("Term".to_string()))?
+                        .as_ref(),
+                    q_namespace?
+                        .o()
+                        .lexical_form()
+                        .ok_or(CuriesError::InvalidFormat("Term".to_string()))?
+                        .as_ref(),
+                )?;
+            }
         }
         Ok(converter)
     }
@@ -279,7 +345,7 @@ impl Converter {
         Ok(serde_json::to_string(&self)?)
     }
 
-    /// Write the prefix map as a HashMap where keys are prefixes and values are URI prefixes.
+    /// Write the prefix map as a `HashMap` where keys are prefixes and values are URI prefixes.
     pub fn write_prefix_map(&self) -> HashMap<String, String> {
         self.records
             .iter()
@@ -287,7 +353,52 @@ impl Converter {
             .collect()
     }
 
-    /// Write the JSON-LD representation of the prefix map.
+    /// Write the `Converter` prefix map as SHACL prefixes definition in the Turtle format.
+    pub fn write_shacl(&self) -> Result<String, CuriesError> {
+        let mut graph = LightGraph::new();
+        let shacl_ns = Namespace::new("http://www.w3.org/ns/shacl#")?;
+        for (i, arc_record) in self.records.iter().enumerate() {
+            let record = Arc::clone(arc_record);
+            let subject = BnodeId::new_unchecked(format!("{}", i));
+            graph.insert(&subject, shacl_ns.get("prefix")?, record.prefix.as_str())?;
+            graph.insert(
+                &subject,
+                shacl_ns.get("namespace")?,
+                record.uri_prefix.as_str() * xsd::anyURI,
+            )?;
+        }
+        let ttl_prefixes = [
+            (
+                Prefix::new_unchecked("xsd".to_string()),
+                Iri::new_unchecked("http://www.w3.org/2001/XMLSchema#".to_string()),
+            ),
+            (
+                Prefix::new_unchecked("sh".to_string()),
+                Iri::new_unchecked("http://www.w3.org/ns/shacl#".to_string()),
+            ),
+        ];
+        let ttl_config = TurtleConfig::new()
+            .with_pretty(true)
+            .with_prefix_map(&ttl_prefixes[..]);
+        let mut ttl_stringifier = TurtleSerializer::new_stringifier_with_config(ttl_config);
+        Ok(ttl_stringifier.serialize_graph(&graph)?.to_string())
+    }
+
+    /// Write the JSON-LD representation of the prefix map as serde JSON (can be cast to string easily)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use curies::Converter;
+    ///
+    /// let mut converter = Converter::default();
+    /// converter.add_prefix("doid", "http://purl.obolibrary.org/obo/DOID_").unwrap();
+    ///
+    /// assert!(converter.write_jsonld()["@context"]
+    ///     .to_string()
+    ///     .starts_with('{'));
+    /// println!("{:?}", converter.write_jsonld());
+    /// ```
     pub fn write_jsonld(&self) -> serde_json::Value {
         let mut context = json!({});
         for record in &self.records {
@@ -495,6 +606,84 @@ impl Converter {
                 Err(_) => None,
             })
             .collect()
+    }
+
+    /// Get the standard prefix for a given prefix
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use curies::sources::get_bioregistry_converter;
+    /// use tokio::runtime;
+    ///
+    /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    /// let converter = rt.block_on(async {
+    ///      get_bioregistry_converter().await
+    /// }).expect("Failed to create the converter");
+    /// assert_eq!(converter.standardize_prefix("gomf").unwrap(), "go");
+    /// ```
+    pub fn standardize_prefix(&self, prefix: &str) -> Result<String, CuriesError> {
+        Ok(self.find_by_prefix(prefix)?.prefix.to_string())
+    }
+
+    /// Standardize a CURIE
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use curies::sources::get_bioregistry_converter;
+    /// use tokio::runtime;
+    ///
+    /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    /// let converter = rt.block_on(async {
+    ///      get_bioregistry_converter().await
+    /// }).expect("Failed to create the converter");
+    /// assert_eq!(converter.standardize_curie("gomf:0032571").unwrap(), "go:0032571");
+    /// ```
+    pub fn standardize_curie(&self, curie: &str) -> Result<String, CuriesError> {
+        let parts: Vec<&str> = curie.split(':').collect();
+        if parts.len() == 2 {
+            Ok(format!(
+                "{}:{}",
+                self.standardize_prefix(parts[0])?,
+                parts[1]
+            ))
+        } else {
+            Ok(curie.to_string())
+        }
+    }
+
+    /// Standardize a URI
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use curies::sources::get_bioregistry_converter;
+    /// use tokio::runtime;
+    ///
+    /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    /// let converter = rt.block_on(async {
+    ///      get_bioregistry_converter().await
+    /// }).expect("Failed to create the converter");
+    /// assert_eq!(
+    ///     converter.standardize_uri("http://amigo.geneontology.org/amigo/term/GO:0032571").unwrap(),
+    ///     "http://purl.obolibrary.org/obo/GO_0032571",
+    /// );
+    /// ```
+    pub fn standardize_uri(&self, uri: &str) -> Result<String, CuriesError> {
+        let rec = self.find_by_uri(uri)?;
+        if uri.starts_with(&rec.uri_prefix) {
+            Ok(uri.to_string())
+        } else {
+            let (_new_prefix, id) = rec
+                .uri_prefix_synonyms
+                .iter()
+                .filter(|synonym| uri.starts_with(&**synonym))
+                .max_by_key(|synonym| synonym.len()) // Get longest first
+                .and_then(|synonym| uri.strip_prefix(synonym).map(|id| (synonym, id)))
+                .ok_or_else(|| CuriesError::NotFound(uri.to_string()))?;
+            Ok(format!("{}{}", rec.uri_prefix, id))
+        }
     }
 
     /// Returns the number of `Records` in the `Converter`

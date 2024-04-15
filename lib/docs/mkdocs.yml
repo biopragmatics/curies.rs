@@ -58,7 +58,7 @@ nav:
     - Use from Rust: rust.md
     - Data structures: struct.md
     - Architecture details: architecture.md
-    - Development: contributing.md
+    - Contributing: contributing.md
   - Python:
     - Use from Python: python.md
   - JavaScript:

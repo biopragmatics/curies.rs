@@ -17,7 +17,7 @@ use crate::{error::CuriesError, Converter};
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let converter = rt.block_on(async {
 ///      get_obo_converter().await
-/// }).expect("Failed to create the OBO converter");
+/// }).expect("Failed to create the converter");
 ///
 /// let uri = converter.expand("DOID:1234").unwrap();
 /// assert_eq!(uri, "http://purl.obolibrary.org/obo/DOID_1234");
@@ -57,7 +57,7 @@ pub async fn get_obo_converter() -> Result<Converter, CuriesError> {
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let converter = rt.block_on(async {
 ///      get_monarch_converter().await
-/// }).expect("Failed to create the GO converter");
+/// }).expect("Failed to create the converter");
 ///
 /// let uri = converter.expand("CHEBI:24867").unwrap();
 /// assert_eq!(uri, "http://purl.obolibrary.org/obo/CHEBI_24867");
@@ -92,7 +92,7 @@ pub async fn get_monarch_converter() -> Result<Converter, CuriesError> {
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let converter = rt.block_on(async {
 ///      get_go_converter().await
-/// }).expect("Failed to create the GO converter");
+/// }).expect("Failed to create the converter");
 ///
 /// let uri = converter.expand("NCBIGene:100010").unwrap();
 /// assert_eq!(uri, "http://identifiers.org/ncbigene/100010");
@@ -121,7 +121,7 @@ pub async fn get_go_converter() -> Result<Converter, CuriesError> {
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let converter = rt.block_on(async {
 ///      get_bioregistry_converter().await
-/// }).expect("Failed to create the GO converter");
+/// }).expect("Failed to create the converter");
 ///
 /// let uri = converter.expand("NCBIGene:100010").unwrap();
 /// assert_eq!(uri, "https://www.ncbi.nlm.nih.gov/gene/100010");

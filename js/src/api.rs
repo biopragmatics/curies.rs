@@ -83,6 +83,17 @@ impl ConverterJs {
         })
     }
 
+    /// Load `Converter` from extended prefix map JSON string or URL
+    #[wasm_bindgen(static_method_of = ConverterJs, js_name = fromExtendedPrefixMap)]
+    pub fn from_extended_prefix_map(prefix_map: String) -> Promise {
+        future_to_promise(async move {
+            match Converter::from_extended_prefix_map(&*prefix_map).await {
+                Ok(converter) => Ok(JsValue::from(ConverterJs { converter })),
+                Err(e) => Err(JsValue::from_str(&e.to_string())),
+            }
+        })
+    }
+
     /// Load `Converter` from JSON-LD string or URL
     #[wasm_bindgen(static_method_of = ConverterJs, js_name = fromJsonld)]
     pub fn from_jsonld(jsonld: String) -> Promise {
@@ -94,11 +105,11 @@ impl ConverterJs {
         })
     }
 
-    /// Load `Converter` from extended prefix map JSON string or URL
-    #[wasm_bindgen(static_method_of = ConverterJs, js_name = fromExtendedPrefixMap)]
-    pub fn from_extended_prefix_map(prefix_map: String) -> Promise {
+    /// Load `Converter` from JSON-LD string or URL
+    #[wasm_bindgen(static_method_of = ConverterJs, js_name = fromShacl)]
+    pub fn from_shacl(shacl: String) -> Promise {
         future_to_promise(async move {
-            match Converter::from_extended_prefix_map(&*prefix_map).await {
+            match Converter::from_shacl(&*shacl).await {
                 Ok(converter) => Ok(JsValue::from(ConverterJs { converter })),
                 Err(e) => Err(JsValue::from_str(&e.to_string())),
             }
@@ -169,6 +180,72 @@ impl ConverterJs {
             .map(JsValue::from)
             .collect::<Array>();
         Ok(JsValue::from(js_array))
+    }
+
+    /// Standardize prefix
+    #[wasm_bindgen(js_name = standardizePrefix)]
+    pub fn standardize_prefix(&self, prefix: String) -> Result<String, JsValue> {
+        self.converter
+            .standardize_prefix(&prefix)
+            .map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+
+    /// Standardize a CURIE
+    #[wasm_bindgen(js_name = standardizeCurie)]
+    pub fn standardize_curie(&self, curie: String) -> Result<String, JsValue> {
+        self.converter
+            .standardize_curie(&curie)
+            .map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+
+    /// Standardize a URI
+    #[wasm_bindgen(js_name = standardizeUri)]
+    pub fn standardize_uri(&self, uri: String) -> Result<String, JsValue> {
+        self.converter
+            .standardize_uri(&uri)
+            .map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+
+    #[wasm_bindgen(js_name = getPrefixes)]
+    pub fn get_prefixes(&self, include_synonyms: Option<bool>) -> Vec<String> {
+        self.converter
+            .get_prefixes(include_synonyms.unwrap_or(false))
+    }
+
+    #[wasm_bindgen(js_name = getUriPrefixes)]
+    pub fn get_uri_prefixes(&self, include_synonyms: Option<bool>) -> Vec<String> {
+        self.converter
+            .get_uri_prefixes(include_synonyms.unwrap_or(false))
+    }
+
+    /// Write the `Converter` as a simple prefix map JSON
+    #[wasm_bindgen(js_name = writePrefixMap)]
+    pub fn write_prefix_map(&self) -> String {
+        format!("{:?}", self.converter.write_prefix_map())
+    }
+
+    /// Write the `Converter` as a extended prefix map JSON
+    #[wasm_bindgen(js_name = writeExtendedPrefixMap)]
+    pub fn write_extended_prefix_map(&self) -> Result<String, JsValue> {
+        Ok((self
+            .converter
+            .write_extended_prefix_map()
+            .map_err(|e| JsValue::from_str(&e.to_string()))?)
+        .to_string())
+    }
+
+    /// Write the `Converter` prefix map as JSON-LD context
+    #[wasm_bindgen(js_name = writeJsonld)]
+    pub fn write_jsonld(&self) -> String {
+        format!("{}", self.converter.write_jsonld())
+    }
+
+    /// Write the `Converter` prefix map as SHACL prefixes definition
+    #[wasm_bindgen(js_name = writeShacl)]
+    pub fn write_shacl(&self) -> Result<String, JsValue> {
+        self.converter
+            .write_shacl()
+            .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
     #[wasm_bindgen(js_name = toString)]

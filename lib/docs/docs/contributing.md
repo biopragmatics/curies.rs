@@ -1,4 +1,4 @@
-# 🛠️ Development
+# 🛠️ Contributing
 
 [![Build](https://github.com/biopragmatics/curies.rs/actions/workflows/build.yml/badge.svg)](https://github.com/biopragmatics/curies.rs/actions/workflows/build.yml) [![Lint and Test](https://github.com/biopragmatics/curies.rs/actions/workflows/test.yml/badge.svg)](https://github.com/biopragmatics/curies.rs/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/biopragmatics/curies.rs/graph/badge.svg?token=BF15PSO6GN)](https://codecov.io/gh/biopragmatics/curies.rs) [![dependency status](https://deps.rs/repo/github/biopragmatics/curies.rs/status.svg)](https://deps.rs/repo/github/biopragmatics/curies.rs)
 
@@ -28,8 +28,7 @@ cd curies.rs
 Install development dependencies:
 
 ```bash
-rustup update
-cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-outdated
+./scripts/install-dev.sh
 ```
 
 > If you are using VSCode we strongly recommend to install the [`rust-lang.rust-analyzer`](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.

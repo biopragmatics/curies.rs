@@ -17,7 +17,7 @@ pub trait PrefixMapSource: Send + Sync {
 #[async_trait(?Send)]
 impl PrefixMapSource for &str {
     async fn fetch(self) -> Result<HashMap<String, Value>, CuriesError> {
-        Ok(serde_json::from_str(&fetch_url(self).await?)?)
+        Ok(serde_json::from_str(&fetch_if_url(self).await?)?)
     }
 }
 #[async_trait(?Send)]
@@ -56,7 +56,7 @@ impl ExtendedPrefixMapSource for Vec<Record> {
 #[async_trait(?Send)]
 impl ExtendedPrefixMapSource for &str {
     async fn fetch(self) -> Result<Vec<Record>, CuriesError> {
-        Ok(serde_json::from_str(&fetch_url(self).await?)?)
+        Ok(serde_json::from_str(&fetch_if_url(self).await?)?)
     }
 }
 #[async_trait(?Send)]
@@ -66,8 +66,26 @@ impl ExtendedPrefixMapSource for &Path {
     }
 }
 
+/// Trait to provide the SHACL prefix map as URL, string, or Path to file
+#[async_trait(?Send)]
+pub trait ShaclSource: Send + Sync {
+    async fn fetch(self) -> Result<String, CuriesError>;
+}
+#[async_trait(?Send)]
+impl ShaclSource for &str {
+    async fn fetch(self) -> Result<String, CuriesError> {
+        fetch_if_url(self).await
+    }
+}
+#[async_trait(?Send)]
+impl ShaclSource for &Path {
+    async fn fetch(self) -> Result<String, CuriesError> {
+        fetch_file(self).await
+    }
+}
+
 /// Given a string, fetch data as string if it is a URL, otherwise return the string
-async fn fetch_url(url: &str) -> Result<String, CuriesError> {
+async fn fetch_if_url(url: &str) -> Result<String, CuriesError> {
     if url.starts_with("https://") || url.starts_with("http://") || url.starts_with("ftp://") {
         // Get URL content with HTTP request
         let client = reqwest::Client::new();

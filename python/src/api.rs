@@ -87,6 +87,31 @@ impl ConverterPy {
         })
     }
 
+    // #[staticmethod]
+    // #[pyo3(text_signature = "(data)")]
+    // fn from_extended_prefix_map(py: Python, data: &PyAny) -> PyResult<Self> {
+    //     let rt = Runtime::new().map_err(|e| PyErr::new::<PyException, _>(format!("Failed to create Tokio runtime: {e}")))?;
+    //     rt.block_on(async move {
+    //         let converter_result = if let Ok(s) = data.downcast::<PyString>() {
+    //             // Handle the case where the input is a string
+    //             Converter::from_extended_prefix_map(s.to_str()?)
+    //                 .await
+    //                 .map_err(|e| PyErr::new::<PyException, _>(format!("Error processing string input: {e}")))
+    //         } else if let Ok(dict) = data.downcast::<PyDict>() {
+    //             // Handle the case where the input is a dictionary
+    //             // let json_str = dict_to_json(py, dict)?;
+    //             let hashmap = dict;
+    //             Converter::from_extended_prefix_map(&hashmap)
+    //                 .await
+    //                 .map_err(|e| PyErr::new::<PyException, _>(format!("Error processing dictionary input: {e}")))
+    //         } else {
+    //             // Return an error if neither type matches
+    //             Err(PyErr::new::<PyTypeError, _>("Expected a string or a dictionary"))
+    //         };
+    //         converter_result.map(|converter| Self { converter })
+    //     })
+    // }
+
     /// Load a `Converter` from a prefix map JSON string or URL
     #[staticmethod]
     #[pyo3(text_signature = "(data)")]
@@ -117,11 +142,34 @@ impl ConverterPy {
         })
     }
 
+    /// Load a `Converter` from a SHACL prefix definition string or URL
+    #[staticmethod]
+    #[pyo3(text_signature = "(data)")]
+    fn from_shacl(data: &str) -> PyResult<Self> {
+        let rt = Runtime::new().map_err(|e| {
+            PyErr::new::<PyException, _>(format!("Failed to create Tokio runtime: {e}"))
+        })?;
+        rt.block_on(async move {
+            Converter::from_shacl(data)
+                .await
+                .map(|converter| Self { converter })
+                .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
+        })
+    }
+
     /// Add a record to the `Converter`
     #[pyo3(text_signature = "($self, record)")]
     fn add_record(&mut self, record: RecordPy) -> PyResult<()> {
         self.converter
             .add_record(record.record)
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
+    }
+
+    /// Add a prefix/namespace to the `Converter`
+    #[pyo3(text_signature = "($self, prefix, namespace)")]
+    fn add_prefix(&mut self, prefix: String, namespace: String) -> PyResult<()> {
+        self.converter
+            .add_prefix(&prefix, &namespace)
             .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
     }
 
@@ -155,11 +203,76 @@ impl ConverterPy {
             .compress_list(uris.iter().map(|s| s.as_str()).collect())
     }
 
+    /// Standardize prefix
+    #[pyo3(text_signature = "($self, prefix)")]
+    fn standardize_prefix(&self, prefix: String) -> PyResult<String> {
+        self.converter
+            .standardize_prefix(&prefix)
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
+    }
+
+    /// Standardize a CURIE
+    #[pyo3(text_signature = "($self, curie)")]
+    fn standardize_curie(&self, curie: String) -> PyResult<String> {
+        self.converter
+            .standardize_curie(&curie)
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
+    }
+
+    /// Standardize a URI
+    #[pyo3(text_signature = "($self, uri)")]
+    fn standardize_uri(&self, uri: String) -> PyResult<String> {
+        self.converter
+            .standardize_uri(&uri)
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
+    }
+
+    #[pyo3(text_signature = "($self, include_synonyms)")]
+    fn get_prefixes(&self, include_synonyms: Option<bool>) -> Vec<String> {
+        self.converter
+            .get_prefixes(include_synonyms.unwrap_or(false))
+    }
+
+    #[pyo3(text_signature = "($self, include_synonyms)")]
+    fn get_uri_prefixes(&self, include_synonyms: Option<bool>) -> Vec<String> {
+        self.converter
+            .get_uri_prefixes(include_synonyms.unwrap_or(false))
+    }
+
     /// Chain with another `Converter`
     #[pyo3(text_signature = "($self, converter)")]
     fn chain(&self, converter: &ConverterPy) -> PyResult<Self> {
         Converter::chain(vec![self.converter.clone(), converter.converter.clone()])
             .map(|converter| ConverterPy { converter })
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
+    }
+
+    /// Write the `Converter` as a simple prefix map JSON
+    #[pyo3(text_signature = "($self)")]
+    fn write_prefix_map(&self) -> String {
+        format!("{:?}", self.converter.write_prefix_map())
+    }
+
+    /// Write the `Converter` as a extended prefix map JSON
+    #[pyo3(text_signature = "($self)")]
+    fn write_extended_prefix_map(&self) -> PyResult<String> {
+        Ok((self
+            .converter
+            .write_extended_prefix_map()
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))?)
+        .to_string())
+    }
+
+    /// Write the `Converter` prefix map as JSON-LD context
+    #[pyo3(text_signature = "($self)")]
+    fn write_jsonld(&self) -> String {
+        format!("{}", self.converter.write_jsonld())
+    }
+
+    #[pyo3(text_signature = "($self)")]
+    fn write_shacl(&self) -> PyResult<String> {
+        self.converter
+            .write_shacl()
             .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
     }
 
@@ -192,8 +305,8 @@ pub fn get_obo_converter() -> PyResult<ConverterPy> {
 }
 
 #[pyfunction]
-pub fn get_bioregistry_converter(py: Python<'_>) -> PyResult<ConverterPy> {
-    // TODO: https://pyo3.rs/v0.21.1/ecosystem/async-await
+pub fn get_bioregistry_converter() -> PyResult<ConverterPy> {
+    // TODO: https://pyo3.rs/v0.21.1/ecosystem/async-await py: Python<'_>
     let rt = Runtime::new().map_err(|e| {
         PyErr::new::<PyException, _>(format!("Failed to create Tokio runtime: {e}"))
     })?;

@@ -22,6 +22,7 @@ js/LICENSE
 
 # R
 *.rds
+.RData
 
 # Docs
 lib/docs/dist
