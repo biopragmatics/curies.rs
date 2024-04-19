@@ -4,7 +4,7 @@
 
 You can easily work with CURIEs in the browser or NodeJS, from JavaScript or TypeScript, with the [`@biopragmatics/curies`](https://www.npmjs.com/package/@biopragmatics/curies) NPM package.
 
-## 📥️ Install
+## 📥️ Installation
 
 Install the `npm` package (use `yarn` or `pnpm` if you prefer) to use it from your favorite framework:
 
@@ -77,6 +77,10 @@ async function main() {
 }
 main();
 ```
+
+!!! example "More examples"
+
+    Checkout the [`curies.test.ts` file](https://github.com/biopragmatics/curies.rs/blob/main/js/tests/curies.test.ts) for more code examples.
 
 ## 🦊 Use it in a browser
 

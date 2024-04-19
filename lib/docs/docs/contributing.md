@@ -31,7 +31,9 @@ Install development dependencies:
 ./scripts/install-dev.sh
 ```
 
-> If you are using VSCode we strongly recommend to install the [`rust-lang.rust-analyzer`](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
+!!! tip "VSCode extension"
+
+    If you are using VSCode we strongly recommend to install the [`rust-lang.rust-analyzer`](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
 
 ## 🧪 Run tests
 
@@ -116,7 +118,10 @@ The first time you will need to add the `--install` flag to install dependencies
 ./scripts/test-r.sh --install
 ```
 
-> You can force `rextendr` to re-build the bindings by making a change to one of the docstring `///` in the `/r/rust/src` code
+!!! info "Force build"
+
+    You can force `rextendr` to re-build the bindings by making a change to one of the docstring `///` in the `/r/rust/src` code
+
 
 ## 🧹 Format and lint
 
@@ -155,16 +160,16 @@ cargo update
 cargo outdated
 ```
 
-## 🏷️ New release
+## 🏷️ Publish a new release
 
-Publishing artifacts will be done by the `build.yml` workflow, make sure you have set the following tokens as secrets for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`
+Building and publishing artifacts will be done by the [`build.yml`](https://github.com/biopragmatics/curies.rs/actions/workflows/build.yml) GitHub actions workflow, make sure you have set the following tokens as secrets on GitHub for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`
 
-1. Bump the version in the `Cargo.toml` file in folders `lib`, `python`, and `js`:
+To release a new version, run the release script providing the new version following [semantic versioning](https://semver.org), it will bump the version in the `Cargo.toml` files, generate the changelog from commit messages, create a new tag, and push to GitHub:
 
-   ```bash
-   ./scripts/bump.sh 0.1.2
-   ```
+```bash
+./scripts/release.sh 0.1.2
+```
 
-2. Commit, push, and **create a new release on GitHub**.
+!!! success "Automated release"
 
-3. The `build.yml` workflow will automatically build artifacts (pip wheel, npm package), add them to the new release, and publish to public registries (crates.io, PyPI, NPM).
+    The `build.yml` workflow will automatically build artifacts (binaries, pip wheels, npm package), create a new release on GitHub, and add the generated artifacts to the new release.

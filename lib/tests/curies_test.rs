@@ -46,7 +46,7 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
     assert!(converter.write_shacl()?.starts_with("PREFIX"));
     // println!("{:?}", converter.write_extended_prefix_map());
     // println!("{:?}", converter.write_jsonld());
-    // println!("{:?}", converter.write_shacl());
+    println!("{:?}", converter.write_shacl());
 
     // Find Record by prefix or URI
     assert_eq!(converter.find_by_prefix("doid")?.prefix, "doid");
@@ -252,5 +252,11 @@ async fn chain_converters() -> Result<(), Box<dyn std::error::Error>> {
     );
     assert!(Converter::chain(vec![]).is_err());
     // assert!(converter.delete_record("Wrong").is_err());
+    assert!(converter
+        .expand_or_standardize("http://purl.obolibrary.org/UNKNOWN_12345")
+        .is_err());
+    assert!(converter
+        .compress_or_standardize("http://purl.obolibrary.org/UNKNOWN_12345")
+        .is_err());
     Ok(())
 }

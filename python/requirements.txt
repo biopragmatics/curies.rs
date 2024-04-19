@@ -2,3 +2,5 @@ maturin
 pre-commit
 pytest
 mktestdocs
+pandas
+rdflib

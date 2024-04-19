@@ -1,10 +1,11 @@
 # 🐍 Use from Python
 
 [![PyPI](https://img.shields.io/pypi/v/curies-rs)](https://pypi.org/project/curies-rs/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/curies-rs.svg?logo=python&label=Python&logoColor=silver)](https://pypi.org/project/curies-rs)
 
 You can easily work with `curies` from Python.
 
-## 📥️ Install
+## 📥️ Installation
 
 Install the `pip` package:
 
@@ -34,21 +35,22 @@ uris = converter.expand_list(["DOID:1234", "doid:1235"])
 assert converter.standardize_prefix("gomf") == "go"
 assert converter.standardize_curie("gomf:0032571") == "go:0032571"
 assert converter.standardize_uri("http://amigo.geneontology.org/amigo/term/GO:0032571") == "http://purl.obolibrary.org/obo/GO_0032571"
-
-# Get the list of prefixes or URI prefixes, argument include_synonyms default to False
-prefixes_without_syn = converter.get_prefixes()
-uri_prefixes_with_syn = converter.get_uri_prefixes(True)
 ```
 
-## 🌀 Load a converter
+## 🌀 Loading a Context
 
-There are many ways to load a CURIE/URI converter.
+There are several ways to load a context with this package, including:
 
-### 📦 Import a predefined converter
+1. pre-defined contexts
+2. contexts encoded in the standard prefix map format
+3. contexts encoded in the standard JSON-LD context format
+4. contexts encoded in the extended prefix map format
+
+### 📦 Loading a predefined context
 
 Easiest way to get started is to simply use one of the function available to import a converter from popular namespaces registries:
 
-#### [Bioregistry](https://bioregistry.io/) converter
+**[Bioregistry](https://bioregistry.io/) converter**
 
 ```python
 from curies_rs import get_bioregistry_converter
@@ -56,7 +58,7 @@ from curies_rs import get_bioregistry_converter
 converter = get_bioregistry_converter()
 ```
 
-#### [OBO](http://obofoundry.org/) converter
+**[OBO](http://obofoundry.org/) converter**
 
 ```python
 from curies_rs import get_obo_converter
@@ -64,7 +66,7 @@ from curies_rs import get_obo_converter
 converter = get_obo_converter()
 ```
 
-#### [GO](https://geneontology.org/) converter
+**[GO](https://geneontology.org/) converter**
 
 ```python
 from curies_rs import get_go_converter
@@ -72,7 +74,7 @@ from curies_rs import get_go_converter
 converter = get_go_converter()
 ```
 
-#### [Monarch Initiative](https://monarchinitiative.org/) converter
+**[Monarch Initiative](https://monarchinitiative.org/) converter**
 
 ```python
 from curies_rs import get_monarch_converter
@@ -80,16 +82,7 @@ from curies_rs import get_monarch_converter
 converter = get_monarch_converter()
 ```
 
-###  📂 Load from file
-
-Converter can be loaded from a prefix map, an extended prefix map (which enables to provide more information for each prefix), or a JSON-LD context.
-
-!!! tip "Support URL"
-
-    For each `Converter.from_` function you can either provide the file content, or the URL to the file as string.
-
-
-#### Load from extended prefix map
+### 🗺️ Loading Extended Prefix Maps
 
 Enable to provide prefix/URI synonyms and ID RegEx pattern for each record:
 
@@ -126,7 +119,11 @@ extended_pm = """[
 converter = Converter.from_extended_prefix_map(extended_pm)
 ```
 
-#### Load from prefix map
+!!! tip "Support URL"
+
+    For all `Converter.from_` functions you can either provide the file content, or the URL to the file as string.
+
+### 📍 Loading Prefix Maps
 
 A simple dictionary without synonyms information:
 
@@ -141,7 +138,7 @@ prefix_map = """{
 converter = Converter.from_prefix_map(prefix_map)
 ```
 
-#### Load from JSON-LD context
+### 📄 Loading JSON-LD contexts
 
 ```python
 from curies_rs import Converter
@@ -164,7 +161,7 @@ from curies_rs import Converter
 converter = Converter.from_jsonld("https://purl.obolibrary.org/meta/obo_context.jsonld")
 ```
 
-#### Load from SHACL prefixes definition
+### 🔗 Loading SHACL prefixes definitions
 
 ```python
 from curies_rs import Converter
@@ -181,24 +178,94 @@ shacl = """@prefix sh: <http://www.w3.org/ns/shacl#> .
 conv = Converter.from_shacl(shacl)
 ```
 
-### 🛠️ Build the converter programmatically
+## 🔎 Introspecting on a Context
 
-Create an empty `Converter`, and populate it with `Record`:
+After loading a context, it’s possible to get certain information out of the converter. For example, if you want to get all of the CURIE prefixes from the converter, you can use `converter.get_prefixes()`:
+
+```python
+from curies_rs import get_bioregistry_converter
+
+converter = get_bioregistry_converter()
+
+prefixes = converter.get_prefixes()
+assert 'chebi' in prefixes
+assert 'CHEBIID' not in prefixes, "No synonyms are included by default"
+
+prefixes = converter.get_prefixes(include_synonyms=True)
+assert 'chebi' in prefixes
+assert 'CHEBIID' in prefixes
+```
+
+Similarly, the URI prefixes can be extracted with `Converter.get_uri_prefixes()` like in:
+
+```python
+from curies_rs import get_bioregistry_converter
+
+converter = get_bioregistry_converter()
+
+uri_prefixes = converter.get_uri_prefixes()
+assert 'http://purl.obolibrary.org/obo/CHEBI_' in uri_prefixes
+assert 'https://bioregistry.io/chebi:' not in uri_prefixes, "No synonyms are included by default"
+
+uri_prefixes = converter.get_uri_prefixes(include_synonyms=True)
+assert 'http://purl.obolibrary.org/obo/CHEBI_' in uri_prefixes
+assert 'https://bioregistry.io/chebi:' in uri_prefixes
+```
+
+It’s also possible to get a bijective prefix map, i.e., a dictionary from primary CURIE prefixes to primary URI prefixes. This is useful for compatibility with legacy systems which assume simple prefix maps. This can be done with the `bimap` property like in the following:
+
+```python
+import json
+from curies_rs import get_bioregistry_converter
+
+converter = get_bioregistry_converter()
+
+prefix_map = json.loads(converter.write_prefix_map())
+assert prefix_map['chebi'] == 'http://purl.obolibrary.org/obo/CHEBI_'
+```
+
+## 🛠️ Modifying a Context
+
+### 🔨 Incremental Converters
+
+New data can be added to an existing converter with either `converter.add_prefix()` or `converter.add_record()`. For example, a CURIE and URI prefix for HGNC can be added to the OBO Foundry converter with the following:
+
+```python
+from curies_rs import get_obo_converter
+
+converter = get_obo_converter()
+converter.add_prefix("hgnc", "https://bioregistry.io/hgnc:")
+```
+
+Similarly, an empty converter can be instantiated using an empty list for the records argument and prefixes can be added one at a time (note this currently does not allow for adding synonyms separately):
 
 ```python
 from curies_rs import Converter, Record
 
 rec1 = Record("doid", "http://purl.obolibrary.org/obo/DOID_", ["DOID"], ["https://identifiers.org/doid/"])
-print(rec1.dict())
+# print(rec1.dict())
 
 converter = Converter()
 converter.add_record(rec1)
-converter.add_prefix("obo", "http://purl.obolibrary.org/obo/")
 ```
 
-### ⛓️ Chain converters
+A more flexible version of this operation first involves constructing a `Record` object:
 
-Chain together multiple converters:
+```python
+from curies_rs import get_obo_converter, Record
+
+converter = get_obo_converter()
+record = Record(prefix="hgnc", uri_prefix="https://bioregistry.io/hgnc:")
+converter.add_record(record)
+```
+
+By default, both of these operations will fail if the new content conflicts with existing content. If desired, the `merge` argument can be set to true to enable merging. Further, checking for conflicts and merging can be made to be case insensitive by setting `case_sensitive` to false.
+
+Such a merging strategy is the basis for wholesale merging of converters, described below.
+
+### ⛓️ Chaining and merging
+
+Chain together multiple converters, prioritizes based on the order given. Therefore, if two prefix maps having the same prefix but different URI prefixes are given, the first is retained. The second is retained as a synonym
 
 ```python
 from curies_rs import get_obo_converter, get_go_converter, get_monarch_converter
@@ -208,12 +275,13 @@ converter = (
     	.chain(get_go_converter())
     	.chain(get_monarch_converter())
 )
-print(len(converter))
 ```
 
-## ✒️ Serialize a converter
+<!-- TODO: Subsetting? -->
 
-Output the converter prefix map as a string in different serialization format:
+## ✒️ Writing a Context
+
+Write the converter prefix map as a string in different serialization format:
 
 ```python
 from curies_rs import get_bioregistry_converter

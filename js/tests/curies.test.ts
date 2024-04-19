@@ -1,8 +1,8 @@
 import {describe, expect, test} from '@jest/globals';
 import {Record, Converter, getOboConverter, getBioregistryConverter, getMonarchConverter, getGoConverter} from "../pkg/node";
 
+// NOTE: `await init()` only needed in browser environment
 describe('Tests for the curies npm package', () => {
-  // NOTE: `await init()` only needed in browser environment
 
   test('from empty converter', async () => {
     const converter = new Converter();
@@ -110,16 +110,43 @@ describe('Tests for the curies npm package', () => {
     expect(converter.expand("doid:1234")).toBe("http://purl.obolibrary.org/obo/DOID_1234");
   });
 
+  test('compress/expand or standardize', async () => {
+    const converter = await Converter.fromExtendedPrefixMap(`[{
+      "prefix": "CHEBI",
+      "prefix_synonyms": ["chebi"],
+      "uri_prefix": "http://purl.obolibrary.org/obo/CHEBI_",
+      "uri_prefix_synonyms": ["https://identifiers.org/chebi:"]
+    }]`);
+    expect(converter.expandOrStandardize("CHEBI:138488")).toBe("http://purl.obolibrary.org/obo/CHEBI_138488");
+    expect(converter.expandOrStandardize("chebi:138488")).toBe("http://purl.obolibrary.org/obo/CHEBI_138488");
+    expect(converter.expandOrStandardize("http://purl.obolibrary.org/obo/CHEBI_138488")).toBe("http://purl.obolibrary.org/obo/CHEBI_138488");
+    expect(converter.expandOrStandardize("https://identifiers.org/chebi:138488")).toBe("http://purl.obolibrary.org/obo/CHEBI_138488");
+
+    expect(converter.compressOrStandardize("http://purl.obolibrary.org/obo/CHEBI_138488")).toBe("CHEBI:138488");
+    expect(converter.compressOrStandardize("https://identifiers.org/chebi:138488")).toBe("CHEBI:138488");
+    expect(converter.compressOrStandardize("CHEBI:138488")).toBe("CHEBI:138488");
+    expect(converter.compressOrStandardize("chebi:138488")).toBe("CHEBI:138488");
+  });
+
   test('get OBO converter', async () => {
     const converter = await getOboConverter();
     expect(converter.compress("http://purl.obolibrary.org/obo/DOID_1234")).toBe("DOID:1234");
     expect(converter.expand("DOID:1234")).toBe("http://purl.obolibrary.org/obo/DOID_1234");
+
+    expect(converter.isCurie("GO:1234567")).toBe(true);
+    expect(converter.isCurie("http://purl.obolibrary.org/obo/GO_1234567")).toBe(false);
+    expect(converter.isCurie("pdb:2gc4")).toBe(false);
+
+    expect(converter.isUri("http://purl.obolibrary.org/obo/GO_1234567")).toBe(true);
+    expect(converter.isUri("GO:1234567")).toBe(false);
+    expect(converter.isUri("http://proteopedia.org/wiki/index.php/2gc4")).toBe(false);
   });
 
   test('get Bioregistry converter', async () => {
     const converter = await getBioregistryConverter();
     expect(converter.compress("http://purl.obolibrary.org/obo/DOID_1234")).toBe("doid:1234");
     expect(converter.expand("doid:1234")).toBe("http://purl.obolibrary.org/obo/DOID_1234");
+
     expect(converter.standardizePrefix("gomf")).toBe("go");
     expect(converter.standardizeCurie("gomf:0032571")).toBe("go:0032571");
     expect(converter.standardizeUri("http://amigo.geneontology.org/amigo/term/GO:0032571")).toBe("http://purl.obolibrary.org/obo/GO_0032571");

@@ -1,9 +1,6 @@
 name: Build
 on:
   workflow_dispatch:
-  release:
-    types:
-      - published
   push:
     tags:
       - "v*.*.*"
@@ -12,7 +9,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# cf. https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/artifacts.yml
 jobs:
 
   npm_tarball:
@@ -46,20 +42,7 @@ jobs:
         working-directory: ./js
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        if: github.event_name == 'release'
-
-  publish_crates:
-    name: 📦️ Publish crates to crates.io
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: rustup update
-      - run: cargo login $CRATES_IO_TOKEN
-        env:
-          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-      - run: cargo publish
-        working-directory: ./lib
+        if: startsWith(github.ref, 'refs/tags/')
 
   # Inspired by pydantic: https://github.com/pydantic/pydantic-core/blob/main/.github/workflows/ci.yml
   build_wheels:
@@ -165,9 +148,48 @@ jobs:
           path: python/dist
 
       - name: Publish to PyPI
-        if: github.event_name == 'release'
-        # if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         run: twine upload python/dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+
+  publish_crates:
+    name: 📦️ Publish crates to crates.io
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update
+      - run: cargo login $CRATES_IO_TOKEN
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+      - run: cargo publish
+        working-directory: ./lib
+
+  generate-changelog:
+    name: 🏔️ Generate changelog for GitHub release
+    runs-on: ubuntu-latest
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@main
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: -vv --latest --strip header
+        env:
+          OUTPUT: CHANGES.md
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGES.md
+        if: startsWith(github.ref, 'refs/tags/')

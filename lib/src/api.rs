@@ -255,19 +255,25 @@ impl Converter {
         let shacl_ns = Namespace::new("http://www.w3.org/ns/shacl#")?;
         // Iterate over triples that match the SHACL prefix and namespace pattern
         for q_prefix in graph.quads_matching(Any, [shacl_ns.get("prefix")?], Any, Any) {
-            for q_namespace in
+            for q_ns in
                 graph.quads_matching([q_prefix?.s()], [shacl_ns.get("namespace")?], Any, Any)
             {
                 converter.add_prefix(
                     q_prefix?
                         .o()
                         .lexical_form()
-                        .ok_or(CuriesError::InvalidFormat("Term".to_string()))?
+                        .ok_or(CuriesError::InvalidFormat(format!(
+                            "Prefix term in SHACL graph {:?}",
+                            q_prefix?.o()
+                        )))?
                         .as_ref(),
-                    q_namespace?
+                    q_ns?
                         .o()
                         .lexical_form()
-                        .ok_or(CuriesError::InvalidFormat("Term".to_string()))?
+                        .ok_or(CuriesError::InvalidFormat(format!(
+                            "Namespace term in SHACL graph {:?}",
+                            q_ns?.o()
+                        )))?
                         .as_ref(),
                 )?;
             }
@@ -357,9 +363,11 @@ impl Converter {
     pub fn write_shacl(&self) -> Result<String, CuriesError> {
         let mut graph = LightGraph::new();
         let shacl_ns = Namespace::new("http://www.w3.org/ns/shacl#")?;
+        let declare_subject = BnodeId::new_unchecked("declareNode".to_string());
         for (i, arc_record) in self.records.iter().enumerate() {
             let record = Arc::clone(arc_record);
             let subject = BnodeId::new_unchecked(format!("{}", i));
+            graph.insert(&declare_subject, shacl_ns.get("declare")?, &subject)?;
             graph.insert(&subject, shacl_ns.get("prefix")?, record.prefix.as_str())?;
             graph.insert(
                 &subject,
@@ -568,7 +576,9 @@ impl Converter {
                 record
                     .uri_prefix_synonyms
                     .iter()
-                    .find_map(|synonym| uri.strip_prefix(synonym))
+                    .filter(|synonym| uri.starts_with(&**synonym))
+                    .max_by_key(|synonym| synonym.len()) // Get longest first
+                    .and_then(|synonym| uri.strip_prefix(synonym))
             })
             .ok_or_else(|| CuriesError::NotFound(uri.to_string()))?;
         self.validate_id(id, record)?;
@@ -606,6 +616,94 @@ impl Converter {
                 Err(_) => None,
             })
             .collect()
+    }
+
+    /// Checks if a given string is a valid CURIE according to the current `Converter`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use curies::Converter;
+    ///
+    /// let mut converter = Converter::default();
+    /// converter.add_prefix("doid", "http://purl.obolibrary.org/obo/DOID_").unwrap();
+    ///
+    /// assert_eq!(converter.is_curie("doid:1234"), true);
+    /// assert_eq!(converter.is_curie("go:0001"), false);
+    /// ```
+    pub fn is_curie(&self, curie: &str) -> bool {
+        self.expand(curie).is_ok()
+    }
+
+    /// Checks if a given string is a valid URI according to the current `Converter`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use curies::Converter;
+    ///
+    /// let mut converter = Converter::default();
+    /// converter.add_prefix("doid", "http://purl.obolibrary.org/obo/DOID_").unwrap();
+    ///
+    /// assert_eq!(converter.is_uri("http://purl.obolibrary.org/obo/DOID_1234"), true);
+    /// assert_eq!(converter.is_uri("http://purl.obolibrary.org/obo/GO_0001"), false);
+    /// ```
+    pub fn is_uri(&self, uri: &str) -> bool {
+        self.compress(uri).is_ok()
+    }
+
+    // TODO: Error for GO because those 2 synonyms are added: http://amigo.geneontology.org/amigo/term/GO: and http://amigo.geneontology.org/amigo/term/
+    // And sometime compress picks the shorter one
+    // So we need to make sure the synonyms are not added if they are already in the trie
+
+    /// Attempts to compress a URI to a CURIE, or standardize it if it's already a CURIE.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use curies::sources::get_bioregistry_converter;
+    /// use tokio::runtime;
+    ///
+    /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    /// let converter = rt.block_on(async {
+    ///      get_bioregistry_converter().await
+    /// }).expect("Failed to create the converter");
+    ///
+    /// assert_eq!(converter.compress_or_standardize("http://amigo.geneontology.org/amigo/term/GO:0032571").unwrap(), "go:0032571".to_string());
+    /// assert_eq!(converter.compress_or_standardize("gomf:0032571").unwrap(), "go:0032571".to_string());
+    /// assert!(converter.compress_or_standardize("http://purl.obolibrary.org/UNKNOWN_12345").is_err());
+    /// ```
+    pub fn compress_or_standardize(&self, input: &str) -> Result<String, CuriesError> {
+        if self.is_curie(input) {
+            self.standardize_curie(input)
+        } else {
+            self.compress(input)
+        }
+    }
+
+    /// Attempts to expand a CURIE to a URI, or standardize it if it's already a URI.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use curies::sources::get_bioregistry_converter;
+    /// use tokio::runtime;
+    ///
+    /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    /// let converter = rt.block_on(async {
+    ///      get_bioregistry_converter().await
+    /// }).expect("Failed to create the converter");
+    ///
+    /// assert_eq!(converter.expand_or_standardize("http://amigo.geneontology.org/amigo/term/GO:0032571").unwrap(), "http://purl.obolibrary.org/obo/GO_0032571".to_string());
+    /// assert_eq!(converter.expand_or_standardize("gomf:0032571").unwrap(), "http://purl.obolibrary.org/obo/GO_0032571".to_string());
+    /// assert!(converter.expand_or_standardize("http://purl.obolibrary.org/UNKNOWN_12345").is_err());
+    /// ```
+    pub fn expand_or_standardize(&self, input: &str) -> Result<String, CuriesError> {
+        if self.is_curie(input) {
+            Ok(self.expand(input)?)
+        } else {
+            Ok(self.standardize_uri(input)?)
+        }
     }
 
     /// Get the standard prefix for a given prefix

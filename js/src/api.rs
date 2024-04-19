@@ -206,6 +206,34 @@ impl ConverterJs {
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
+    /// Checks if a given string is a valid URI according to the current `Converter`
+    #[wasm_bindgen(js_name = isUri)]
+    pub fn is_uri(&self, uri: String) -> bool {
+        self.converter.is_uri(&uri)
+    }
+
+    /// Checks if a given string is a valid CURIE according to the current `Converter`
+    #[wasm_bindgen(js_name = isCurie)]
+    pub fn is_curie(&self, curie: String) -> bool {
+        self.converter.is_curie(&curie)
+    }
+
+    /// Attempts to compress a URI to a CURIE, or standardize it if it's already a CURIE.
+    #[wasm_bindgen(js_name = compressOrStandardize)]
+    pub fn compress_or_standardize(&self, input: String) -> Result<String, JsValue> {
+        self.converter
+            .compress_or_standardize(&input)
+            .map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+
+    /// Attempts to expand a CURIE to a URI, or standardize it if it's already a URI.
+    #[wasm_bindgen(js_name = expandOrStandardize)]
+    pub fn expand_or_standardize(&self, input: String) -> Result<String, JsValue> {
+        self.converter
+            .expand_or_standardize(&input)
+            .map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+
     #[wasm_bindgen(js_name = getPrefixes)]
     pub fn get_prefixes(&self, include_synonyms: Option<bool>) -> Vec<String> {
         self.converter

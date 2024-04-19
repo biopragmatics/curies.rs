@@ -12,7 +12,6 @@ use serde::{Deserialize, Serialize};
 use tokio::runtime::Runtime;
 
 #[pyclass(name = "Record", module = "curies_rs")]
-// #[pyclass(extends=Record, name = "Record", module = "curies_rs")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecordPy {
     record: Record,
@@ -21,7 +20,7 @@ pub struct RecordPy {
 #[pymethods]
 impl RecordPy {
     #[new]
-    #[pyo3(text_signature = "(prefix, uri_prefix, prefix_synonyms, uri_prefix_synonyms)")]
+    #[pyo3(text_signature = "(prefix, uri_prefix, prefix_synonyms=[], uri_prefix_synonyms=[])")]
     fn new(
         prefix: String,
         uri_prefix: String,
@@ -43,7 +42,7 @@ impl RecordPy {
     }
 
     // Return the Record as a python dictionary
-    #[pyo3(text_signature = "($self)")]
+    #[pyo3(text_signature = "()")]
     fn dict(&self, py: Python<'_>) -> PyResult<PyObject> {
         pythonize(py, &self.record).map_err(|e| {
             PyErr::new::<PyException, _>(format!("Error converting struct Record to dict: {e}"))
@@ -158,7 +157,7 @@ impl ConverterPy {
     }
 
     /// Add a record to the `Converter`
-    #[pyo3(text_signature = "($self, record)")]
+    #[pyo3(text_signature = "(record)")]
     fn add_record(&mut self, record: RecordPy) -> PyResult<()> {
         self.converter
             .add_record(record.record)
@@ -166,7 +165,7 @@ impl ConverterPy {
     }
 
     /// Add a prefix/namespace to the `Converter`
-    #[pyo3(text_signature = "($self, prefix, namespace)")]
+    #[pyo3(text_signature = "(prefix, namespace)")]
     fn add_prefix(&mut self, prefix: String, namespace: String) -> PyResult<()> {
         self.converter
             .add_prefix(&prefix, &namespace)
@@ -174,7 +173,7 @@ impl ConverterPy {
     }
 
     /// Compress a URI
-    #[pyo3(text_signature = "($self, uri)")]
+    #[pyo3(text_signature = "(uri)")]
     fn compress(&self, uri: String) -> PyResult<String> {
         self.converter
             .compress(&uri)
@@ -182,7 +181,7 @@ impl ConverterPy {
     }
 
     /// Expand a CURIE
-    #[pyo3(text_signature = "($self, curie)")]
+    #[pyo3(text_signature = "(curie)")]
     fn expand(&self, curie: String) -> PyResult<String> {
         self.converter
             .expand(&curie)
@@ -190,21 +189,21 @@ impl ConverterPy {
     }
 
     /// Expand a list of CURIEs
-    #[pyo3(text_signature = "($self, curies)")]
+    #[pyo3(text_signature = "(curies)")]
     fn expand_list(&self, curies: Vec<String>) -> Vec<Option<String>> {
         self.converter
             .expand_list(curies.iter().map(|s| s.as_str()).collect())
     }
 
     /// Compress a list of URIs
-    #[pyo3(text_signature = "($self, uris)")]
+    #[pyo3(text_signature = "(uris)")]
     fn compress_list(&self, uris: Vec<String>) -> Vec<Option<String>> {
         self.converter
             .compress_list(uris.iter().map(|s| s.as_str()).collect())
     }
 
     /// Standardize prefix
-    #[pyo3(text_signature = "($self, prefix)")]
+    #[pyo3(text_signature = "(prefix)")]
     fn standardize_prefix(&self, prefix: String) -> PyResult<String> {
         self.converter
             .standardize_prefix(&prefix)
@@ -212,7 +211,7 @@ impl ConverterPy {
     }
 
     /// Standardize a CURIE
-    #[pyo3(text_signature = "($self, curie)")]
+    #[pyo3(text_signature = "(curie)")]
     fn standardize_curie(&self, curie: String) -> PyResult<String> {
         self.converter
             .standardize_curie(&curie)
@@ -220,27 +219,55 @@ impl ConverterPy {
     }
 
     /// Standardize a URI
-    #[pyo3(text_signature = "($self, uri)")]
+    #[pyo3(text_signature = "(uri)")]
     fn standardize_uri(&self, uri: String) -> PyResult<String> {
         self.converter
             .standardize_uri(&uri)
             .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
     }
 
-    #[pyo3(text_signature = "($self, include_synonyms)")]
+    /// Checks if a given string is a valid URI according to the current `Converter`
+    #[pyo3(text_signature = "(uri)")]
+    fn is_uri(&self, uri: String) -> bool {
+        self.converter.is_uri(&uri)
+    }
+
+    /// Checks if a given string is a valid CURIE according to the current `Converter`
+    #[pyo3(text_signature = "(curie)")]
+    fn is_curie(&self, curie: String) -> bool {
+        self.converter.is_curie(&curie)
+    }
+
+    /// Attempts to compress a URI to a CURIE, or standardize it if it's already a CURIE.
+    #[pyo3(text_signature = "(input)")]
+    fn compress_or_standardize(&self, input: String) -> PyResult<String> {
+        self.converter
+            .compress_or_standardize(&input)
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
+    }
+
+    /// Attempts to expand a CURIE to a URI, or standardize it if it's already a URI.
+    #[pyo3(text_signature = "(input)")]
+    fn expand_or_standardize(&self, input: String) -> PyResult<String> {
+        self.converter
+            .expand_or_standardize(&input)
+            .map_err(|e| PyErr::new::<PyException, _>(e.to_string()))
+    }
+
+    #[pyo3(text_signature = "(include_synonyms=False)")]
     fn get_prefixes(&self, include_synonyms: Option<bool>) -> Vec<String> {
         self.converter
             .get_prefixes(include_synonyms.unwrap_or(false))
     }
 
-    #[pyo3(text_signature = "($self, include_synonyms)")]
+    #[pyo3(text_signature = "(include_synonyms=False)")]
     fn get_uri_prefixes(&self, include_synonyms: Option<bool>) -> Vec<String> {
         self.converter
             .get_uri_prefixes(include_synonyms.unwrap_or(false))
     }
 
     /// Chain with another `Converter`
-    #[pyo3(text_signature = "($self, converter)")]
+    #[pyo3(text_signature = "(converter)")]
     fn chain(&self, converter: &ConverterPy) -> PyResult<Self> {
         Converter::chain(vec![self.converter.clone(), converter.converter.clone()])
             .map(|converter| ConverterPy { converter })
@@ -248,13 +275,13 @@ impl ConverterPy {
     }
 
     /// Write the `Converter` as a simple prefix map JSON
-    #[pyo3(text_signature = "($self)")]
+    #[pyo3(text_signature = "()")]
     fn write_prefix_map(&self) -> String {
         format!("{:?}", self.converter.write_prefix_map())
     }
 
     /// Write the `Converter` as a extended prefix map JSON
-    #[pyo3(text_signature = "($self)")]
+    #[pyo3(text_signature = "()")]
     fn write_extended_prefix_map(&self) -> PyResult<String> {
         Ok((self
             .converter
@@ -264,12 +291,12 @@ impl ConverterPy {
     }
 
     /// Write the `Converter` prefix map as JSON-LD context
-    #[pyo3(text_signature = "($self)")]
+    #[pyo3(text_signature = "()")]
     fn write_jsonld(&self) -> String {
         format!("{}", self.converter.write_jsonld())
     }
 
-    #[pyo3(text_signature = "($self)")]
+    #[pyo3(text_signature = "()")]
     fn write_shacl(&self) -> PyResult<String> {
         self.converter
             .write_shacl()

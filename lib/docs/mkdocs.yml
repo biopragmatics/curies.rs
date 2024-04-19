@@ -7,6 +7,28 @@ repo_url: https://github.com/biopragmatics/curies.rs
 edit_uri: "edit/main/docs/"
 copyright: Copyright &copy; 2024 Charles Tapley Hoyt & Vincent Emonet
 
+# Find icons: https://fontawesome.com/icons/
+# https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/
+nav:
+  - Docs:
+    - Introduction: index.md
+    - Data structures: struct.md
+    # - Reconciliation: reconciliation.md
+    - Architecture details: architecture.md
+    - Contributing: contributing.md
+  - Rust:
+    - Use from Rust: rust.md
+  - Python:
+    - Use from Python: python.md
+    - Tools for Developers and Semantic Engineers: python-devtools.md
+  - JavaScript:
+    - Use from JavaScript: javascript.md
+    - Example bare HTML: javascript-example-html.md
+    - Example JS framework: javascript-example-framework.md
+  - R:
+    - Use from R: r.md
+  # - Issues: https://github.com/biopragmatics/curies.rs/issues" target="_blank
+
 theme:
   name: "material"
   favicon: assets/logo.png
@@ -50,25 +72,6 @@ theme:
     # - navigation.instant
     # - content.tabs.link
 
-# Find icons: https://fontawesome.com/icons/
-# https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/
-nav:
-  - Docs:
-    - Introduction: index.md
-    - Use from Rust: rust.md
-    - Data structures: struct.md
-    - Architecture details: architecture.md
-    - Contributing: contributing.md
-  - Python:
-    - Use from Python: python.md
-  - JavaScript:
-    - Use from JavaScript: javascript.md
-    - Example bare HTML: javascript-example-html.md
-    - Example JS framework: javascript-example-framework.md
-  - R:
-    - Use from R: r.md
-  # - Issues: https://github.com/biopragmatics/curies.rs/issues" target="_blank
-
 plugins:
 - search
 - open-in-new-tab
@@ -81,10 +84,6 @@ plugins:
           show_source: true
     # custom_templates: templates
 
-watch:
-  - ../src
-  - docs
-
 markdown_extensions:
   - admonition
   # Supported admonititions: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
@@ -95,6 +94,9 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+      # slugify: !!python/object/apply:pymdownx.slugs.slugify
+      #   kwds:
+      #     case: lower
   - pymdownx.details
   - pymdownx.extra
   - abbr
@@ -106,7 +108,6 @@ markdown_extensions:
   - attr_list
   - smarty
   # - md_in_html
-
 
 extra_css:
   - assets/custom.css
@@ -125,3 +126,7 @@ extra:
       link: https://github.com/biopragmatics
     # - icon: fontawesome/brands/docker
     #   link: https://github.com/biopragmatics/curies.rs/pkgs/container/curies.rs
+
+watch:
+  - ../src
+  - docs

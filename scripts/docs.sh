@@ -8,7 +8,7 @@ if [ ! -d ".venv" ]; then
     python -m venv .venv
 fi
 
-echo "Activating virtual environment"
+echo "⚙️ Activating virtual environment"
 source .venv/bin/activate
 
 pip install -q -r lib/docs/requirements.txt

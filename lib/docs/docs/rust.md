@@ -2,7 +2,13 @@
 
 [![crates.io](https://img.shields.io/crates/v/curies.svg)](https://crates.io/crates/curies)
 
-## 🛠️ General usage
+## 📥️ Installation
+
+```bash
+cargo add curies
+```
+
+## 🚀 Usage
 
 You can use the Rust crate to work with CURIEs: import converters, compress URIs, expand CURIEs.
 
@@ -44,9 +50,9 @@ rt.block_on(async {
 }).unwrap();
 ```
 
-## 🏗️ Build a converter
+## 🛠️ Manipulate converters and records
 
-You can also build a `Converter` programmatically from `Record`:
+You can also build a `Converter` programmatically from `Record` structs:
 
 ```rust
 extern crate curies;

@@ -10,7 +10,7 @@ pip install -r lib/docs/requirements.txt
 
 if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo "Installing Linux specific dependency"
-    maturin[patchelf]
+    pip install "maturin[patchelf]"
 fi
 
 # On MacOS you might need to setup the default CRAN mirror
@@ -19,6 +19,6 @@ fi
 rustup update
 rustup toolchain install nightly # For tarpaulin
 
-cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-outdated
+cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-outdated git-cliff
 
 pre-commit install

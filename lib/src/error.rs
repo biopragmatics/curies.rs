@@ -17,9 +17,9 @@ pub enum CuriesError {
     InvalidFormat(String),
     DuplicateRecord(String),
     Utf8(String),
+    StdIo(String),
     SerdeJson(String),
     Reqwest(String),
-    StdIo(String),
 }
 
 impl Error for CuriesError {}

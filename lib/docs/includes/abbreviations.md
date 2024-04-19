@@ -39,6 +39,7 @@
 *[URLs]: Uniform Resource Locators
 *[URI]: Uniform Resource Identifier
 *[URIs]: Uniform Resource Identifiers
+*[IRIs]: International Resource Identifiers
 *[CURIE]: Compact Uniform Resource Identifier
 *[CURIEs]: Compact Uniform Resource Identifiers
 *[ID]: Identifier
@@ -67,3 +68,5 @@
 *[EPMs]: Extended Prefix Maps
 *[ChEBI]: Chemical Entities of Biological Interest
 *[NCBI]: The National Center for Biotechnology Information (USA)
+*[SNOMED-CT]: Systematized Nomenclature of Medicine - Clinical Terms
+*[VSCode]: VisualStudio Code
