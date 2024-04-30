@@ -1,4 +1,4 @@
-# Introduction
+# ℹ️ Introduction
 
 [![crates.io](https://img.shields.io/crates/v/curies.svg)](https://crates.io/crates/curies)
 [![PyPI](https://img.shields.io/pypi/v/curies-rs)](https://pypi.org/project/curies-rs/)

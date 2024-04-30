@@ -10,3 +10,8 @@ pub mod sources;
 
 pub use api::{Converter, Record};
 pub use error::CuriesError;
+
+// NOTE: Add tests from markdown without putting it into docs
+// #[doc = include_str!("../docs/docs/getting-started.md")]
+// #[cfg(doctest)]
+// pub struct _ReadmeDoctests;

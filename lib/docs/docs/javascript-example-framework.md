@@ -1,6 +1,6 @@
 # ⚛️ Use from any JavaScript framework
 
-It can be used from any JavaScript framework, or NodeJS.
+This package can be used from any JavaScript framework, or NodeJS.
 
 For example, to use it in a nextjs react app:
 

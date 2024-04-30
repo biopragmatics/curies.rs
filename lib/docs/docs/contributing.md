@@ -162,14 +162,16 @@ cargo outdated
 
 ## 🏷️ Publish a new release
 
-Building and publishing artifacts will be done by the [`build.yml`](https://github.com/biopragmatics/curies.rs/actions/workflows/build.yml) GitHub actions workflow, make sure you have set the following tokens as secrets on GitHub for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`
+!!! success "Automated release"
 
-To release a new version, run the release script providing the new version following [semantic versioning](https://semver.org), it will bump the version in the `Cargo.toml` files, generate the changelog from commit messages, create a new tag, and push to GitHub:
+    Building and publishing artifacts (binaries, pip wheels, npm package) will be done automatically by the [`.github/workflows/build.yml`](https://github.com/biopragmatics/curies.rs/actions/workflows/build.yml) GitHub action when you push a new tag.
+
+!!! warning "Set secrets for the GitHub repository"
+
+    Make sure you have set the following tokens as secrets on GitHub for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`
+
+To release a new version, run the release script providing the new version following [semantic versioning](https://semver.org), it will bump the version in the `Cargo.toml` files, generate the changelog from commit messages, create a new tag, and push to GitHub; the workflow will do the rest:
 
 ```bash
 ./scripts/release.sh 0.1.2
 ```
-
-!!! success "Automated release"
-
-    The `build.yml` workflow will automatically build artifacts (binaries, pip wheels, npm package), create a new release on GitHub, and add the generated artifacts to the new release.

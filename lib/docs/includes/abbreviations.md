@@ -49,6 +49,8 @@
 *[CPU]: Central Processing Unit
 *[TPU]: Tensor Processing Unit
 *[aarch64]: ARM64 architecture
+*[ARM]: Advanced RISC Machine (RISC: Reduced Instruction Set Computer)
+*[x86]: Family of Complex Instruction Set Computer (CISC) architectures initially developed by Intel based on the Intel 8086 microprocessor
 *[wasm]: WebAssembly
 *[PDF]: Portable Document Format
 *[ZSH]: The Z shell (Zsh) is a Unix shell that can be used as an interactive login shell, and as a command interpreter for shell scripting.

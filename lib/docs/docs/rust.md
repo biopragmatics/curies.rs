@@ -13,11 +13,11 @@ cargo add curies
 You can use the Rust crate to work with CURIEs: import converters, compress URIs, expand CURIEs.
 
 ```rust
-extern crate curies;
 use curies::{Converter, Record, sources::get_bioregistry_converter};
 use std::collections::HashSet;
 
-async fn usage_example() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Load from a prefix map json (string or URI)
     let converterFromMap = Converter::from_prefix_map(r#"{
@@ -43,11 +43,23 @@ async fn usage_example() -> Result<(), Box<dyn std::error::Error>> {
     println!("Compressed URI: {}", curie);
     Ok(())
 }
+```
 
-let rt = tokio::runtime::Runtime::new().unwrap();
-rt.block_on(async {
-    usage_example().await
-}).unwrap();
+And
+
+```rust
+use curies::sources::get_bioregistry_converter;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let converter = get_bioregistry_converter().await?;
+
+    let epm = converter.write_extended_prefix_map()?;
+    let pm = converter.write_prefix_map();
+    let jsonld = converter.write_jsonld();
+    let shacl = converter.write_shacl()?;
+    Ok(())
+}
 ```
 
 ## 🛠️ Manipulate converters and records

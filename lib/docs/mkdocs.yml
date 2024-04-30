@@ -10,23 +10,29 @@ copyright: Copyright &copy; 2024 Charles Tapley Hoyt & Vincent Emonet
 # Find icons: https://fontawesome.com/icons/
 # https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/
 nav:
-  - Docs:
-    - Introduction: index.md
-    - Data structures: struct.md
-    # - Reconciliation: reconciliation.md
-    - Architecture details: architecture.md
-    - Contributing: contributing.md
-  - Rust:
-    - Use from Rust: rust.md
-  - Python:
-    - Use from Python: python.md
-    - Tools for Developers and Semantic Engineers: python-devtools.md
+  # - Docs:
+  - Introduction: index.md
+  - Getting started: getting-started.md
+  - Tools for Developers and Semantic Engineers: devtools.md
+  - Data structures: struct.md
+  # - Reconciliation: reconciliation.md
   - JavaScript:
-    - Use from JavaScript: javascript.md
     - Example bare HTML: javascript-example-html.md
     - Example JS framework: javascript-example-framework.md
-  - R:
-    - Use from R: r.md
+  - Development:
+    - Architecture details: architecture.md
+    - Contributing: contributing.md
+  # - Rust:
+  #   - Use from Rust: rust.md
+  # - Python:
+  #   - Use from Python: python.md
+  #   - Tools for Developers and Semantic Engineers: python-devtools.md
+  # - JavaScript:
+  #   - Use from JavaScript: javascript.md
+  #   - Example bare HTML: javascript-example-html.md
+  #   - Example JS framework: javascript-example-framework.md
+  # - R:
+  #   - Use from R: r.md
   # - Issues: https://github.com/biopragmatics/curies.rs/issues" target="_blank
 
 theme:
@@ -56,12 +62,13 @@ theme:
   features:
     - navigation.indexes
     - navigation.sections
-    - navigation.tabs
+    # - navigation.tabs
     - navigation.top
     - navigation.tracking
     - content.code.copy
     - content.code.annotate
     - content.code.select
+    - content.tabs.link # Group tabs switch
     - search.highlight
     - search.share
     - search.suggest
@@ -94,6 +101,9 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
       # slugify: !!python/object/apply:pymdownx.slugs.slugify
       #   kwds:
       #     case: lower

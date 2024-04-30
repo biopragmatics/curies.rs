@@ -1,4 +1,4 @@
-# 🚀 Example in bare HTML files
+# 📄 Example in bare HTML files
 
 When using the library directly in the client browser you will need to initialize the wasm binary with `await init()`, after that you can use the same functions as in the NodeJS environments.
 
