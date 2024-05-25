@@ -96,6 +96,8 @@ Initialize a converter, then use it to `compress` URIs to CURIEs, or `expand` CU
         main();
         ```
 
+        This is not required when running JavaScript code on server-side, e.g. using NodeJS.
+
     !!! danger "CORS exists"
 
         When executing JS in the browser we are bound to the same rules as everyone on the web, such as CORS. If CORS are not enabled on the server you are fetching the converter from, then you will need to use a proxy such as [corsproxy.io](https://corsproxy.io).
