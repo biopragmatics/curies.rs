@@ -9,7 +9,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Idiomatic conversion between URIs and compact URIs (CURIEs)"
 readme = "README.md"
@@ -25,7 +25,7 @@ authors = [
 ]
 
 [workspace.dependencies]
-curies = { version = "0.1.1", path = "./lib" }
+curies = { version = "0.1.2", path = "./lib" }
 serde = { version = "1.0" }
 
 [profile.release]
