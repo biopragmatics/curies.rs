@@ -21,7 +21,7 @@ echo "🔼  Updated version in Cargo.toml"
 
 git cliff -o CHANGELOG.md --tag $new_version
 git add Cargo.toml */Cargo.toml CHANGELOG.md
-git commit -S -m "chore: Bump version to $new_version"
+git commit -m "chore: Bump version to $new_version"
 git push
 
 echo ""
