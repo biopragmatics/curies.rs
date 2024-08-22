@@ -2,7 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.2](https://github.com/vemonet/nanopub-rs/compare/v0.1.1..0.1.2) - 2024-05-25
+## [0.1.3](https://github.com/vemonet/nanopub-rs/compare/v0.1.2..0.1.3) - 2024-08-22
+
+### ⛰️ Features
+
+- [**breaking**] Add passthrough param to the compress_list and expand_list functions (default to true for python and JS bindings) - ([b7fae77](https://github.com/vemonet/nanopub-rs/commit/b7fae778c76eeaf9453dbe8362f5a69ee92141ec))
+
+### 🐛 Bug Fixes
+
+- Fix reqwest version to avoid vulnerability - ([d9b6414](https://github.com/vemonet/nanopub-rs/commit/d9b6414381ea1f8d585125a10bc6d1a833d67253))
+
+### 🛠️ Miscellaneous Tasks
+
+- Fix version in github action workflow - ([df2a833](https://github.com/vemonet/nanopub-rs/commit/df2a8335235d3452bade8131eb42762e11cf438f))
+
+## [0.1.2](https://github.com/vemonet/nanopub-rs/compare/v0.1.1..v0.1.2) - 2024-05-25
 
 ### ⛰️ Features
 
@@ -20,6 +34,10 @@ All notable changes to this project will be documented in this file.
 ### 📚 Documentation
 
 - Use codeblocks tabs for the different languages - ([a8e9dd0](https://github.com/vemonet/nanopub-rs/commit/a8e9dd03ffda2161d45f1b693b4854c2cfd000ba))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump version to 0.1.2 - ([6386305](https://github.com/vemonet/nanopub-rs/commit/6386305ea108885d323b11ef71c7f4de733068d1))
 
 ## [0.1.1](https://github.com/vemonet/nanopub-rs/compare/v0.1.0..v0.1.1) - 2024-01-02
 
