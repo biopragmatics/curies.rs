@@ -190,16 +190,20 @@ impl ConverterPy {
 
     /// Expand a list of CURIEs
     #[pyo3(text_signature = "(curies)")]
-    fn expand_list(&self, curies: Vec<String>) -> Vec<Option<String>> {
-        self.converter
-            .expand_list(curies.iter().map(|s| s.as_str()).collect())
+    fn expand_list(&self, curies: Vec<String>, passthrough: Option<bool>) -> Vec<Option<String>> {
+        self.converter.expand_list(
+            curies.iter().map(|s| s.as_str()).collect(),
+            passthrough.unwrap_or(true),
+        )
     }
 
     /// Compress a list of URIs
     #[pyo3(text_signature = "(uris)")]
-    fn compress_list(&self, uris: Vec<String>) -> Vec<Option<String>> {
-        self.converter
-            .compress_list(uris.iter().map(|s| s.as_str()).collect())
+    fn compress_list(&self, uris: Vec<String>, passthrough: Option<bool>) -> Vec<Option<String>> {
+        self.converter.compress_list(
+            uris.iter().map(|s| s.as_str()).collect(),
+            passthrough.unwrap_or(true),
+        )
     }
 
     /// Standardize prefix

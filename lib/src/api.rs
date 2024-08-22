@@ -157,6 +157,8 @@ impl Converter {
     /// assert_eq!(curie, "DOID:1234");
     /// ```
     pub async fn from_prefix_map<T: PrefixMapSource>(prefix_map: T) -> Result<Self, CuriesError> {
+        // TODO: better error handling. We should show all the errors at once instead of stopping at the first one
+        // cf. original python implementation
         let prefix_map: HashMap<String, Value> = prefix_map.fetch().await?;
         let mut converter = Converter::default();
         for (prefix, uri_prefix) in prefix_map {
@@ -598,22 +600,35 @@ impl Converter {
     }
 
     /// Compresses a list of URIs to CURIEs
-    pub fn compress_list(&self, uris: Vec<&str>) -> Vec<Option<String>> {
+    pub fn compress_list(&self, uris: Vec<&str>, passthrough: bool) -> Vec<Option<String>> {
+        // TODO: fixed
         uris.into_iter()
             .map(|uri| match self.compress(uri) {
                 Ok(curie) => Some(curie),
-                Err(_) => None,
+                Err(_) => {
+                    if passthrough {
+                        Some(uri.to_string()) // Return the full URI if passthrough is true
+                    } else {
+                        None
+                    }
+                }
             })
             .collect()
     }
 
     /// Expands a list of CURIESs to URIs
-    pub fn expand_list(&self, curies: Vec<&str>) -> Vec<Option<String>> {
+    pub fn expand_list(&self, curies: Vec<&str>, passthrough: bool) -> Vec<Option<String>> {
         curies
             .into_iter()
             .map(|curie| match self.expand(curie) {
                 Ok(uri) => Some(uri),
-                Err(_) => None,
+                Err(_) => {
+                    if passthrough {
+                        Some(curie.to_string()) // Return the full URI if passthrough is true
+                    } else {
+                        None
+                    }
+                }
             })
             .collect()
     }

@@ -86,15 +86,37 @@ fn new_empty_converter() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     assert_eq!(
-        converter
-            .compress_list(["http://wrong/1234", "https://identifiers.org/DOID/1234"].to_vec()),
+        converter.compress_list(
+            ["http://wrong/1234", "https://identifiers.org/DOID/1234"].to_vec(),
+            false
+        ),
         [None, Some("doid:1234".to_string())].to_vec()
     );
     assert_eq!(
-        converter.expand_list(["doid:1234", "wrong:1234"].to_vec()),
+        converter.expand_list(["doid:1234", "wrong:1234"].to_vec(), false),
         [
             Some("http://purl.obolibrary.org/obo/DOID_1234".to_string()),
             None
+        ]
+        .to_vec()
+    );
+
+    assert_eq!(
+        converter.compress_list(
+            ["http://wrong/1234", "https://identifiers.org/DOID/1234"].to_vec(),
+            true
+        ),
+        [
+            Some("http://wrong/1234".to_string()),
+            Some("doid:1234".to_string())
+        ]
+        .to_vec()
+    );
+    assert_eq!(
+        converter.expand_list(["doid:1234", "wrong:1234"].to_vec(), true),
+        [
+            Some("http://purl.obolibrary.org/obo/DOID_1234".to_string()),
+            Some("wrong:1234".to_string()),
         ]
         .to_vec()
     );

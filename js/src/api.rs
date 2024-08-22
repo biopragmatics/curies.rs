@@ -156,12 +156,19 @@ impl ConverterJs {
     // TODO: Use Vec<String> instead of JsValue possible?
     /// Expand a list of CURIEs to URIs
     #[wasm_bindgen(js_name = expandList)]
-    pub fn expand_list(&self, curies: JsValue) -> Result<JsValue, JsValue> {
+    pub fn expand_list(
+        &self,
+        curies: JsValue,
+        passthrough: Option<bool>,
+    ) -> Result<JsValue, JsValue> {
         let curies_vec: Vec<String> = serde_wasm_bindgen::from_value(curies)
             .map_err(|e| JsValue::from_str(&format!("Error converting CURIEs list: {}", e)))?;
         let js_array = self
             .converter
-            .expand_list(curies_vec.iter().map(String::as_str).collect())
+            .expand_list(
+                curies_vec.iter().map(String::as_str).collect(),
+                passthrough.unwrap_or(true),
+            )
             .into_iter()
             .map(JsValue::from)
             .collect::<Array>();
@@ -170,12 +177,19 @@ impl ConverterJs {
 
     /// Compress a list of URIs to CURIEs
     #[wasm_bindgen(js_name = compressList)]
-    pub fn compress_list(&self, curies: JsValue) -> Result<JsValue, JsValue> {
+    pub fn compress_list(
+        &self,
+        curies: JsValue,
+        passthrough: Option<bool>,
+    ) -> Result<JsValue, JsValue> {
         let curies_vec: Vec<String> = serde_wasm_bindgen::from_value(curies)
             .map_err(|e| JsValue::from_str(&format!("Error converting URIs list: {}", e)))?;
         let js_array = self
             .converter
-            .compress_list(curies_vec.iter().map(String::as_str).collect())
+            .compress_list(
+                curies_vec.iter().map(String::as_str).collect(),
+                passthrough.unwrap_or(true),
+            )
             .into_iter()
             .map(JsValue::from)
             .collect::<Array>();

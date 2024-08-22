@@ -14,14 +14,14 @@ describe('Tests for the curies npm package', () => {
     expect(converter.expandList(["OBO:1234", "DOID:1234", "Wrong:1"])).toEqual([
       "http://purl.obolibrary.org/obo/1234",
       "http://purl.obolibrary.org/obo/DOID_1234",
-      undefined
+      "Wrong:1"
     ]);
     expect(converter.compress("http://purl.obolibrary.org/obo/1234")).toBe("OBO:1234");
     expect(converter.compressList([
       "http://purl.obolibrary.org/obo/1234",
       "http://purl.obolibrary.org/obo/DOID_1234",
       "http://identifiers.org/DOID:1234"
-    ])).toEqual(["OBO:1234", "DOID:1234", undefined]);
+    ])).toEqual(["OBO:1234", "DOID:1234", "http://identifiers.org/DOID:1234"]);
     expect(converter.getPrefixes().length).toBe(2)
     expect(converter.getUriPrefixes().length).toBe(2)
 
@@ -43,13 +43,13 @@ describe('Tests for the curies npm package', () => {
     expect(converter.expandList(["OBO:1234", "DOID:1234", "Wrong:1"])).toEqual([
       "http://purl.obolibrary.org/obo/1234",
       "http://purl.obolibrary.org/obo/DOID_1234",
-      undefined
+      "Wrong:1",
     ]);
     expect(converter.compressList([
       "http://purl.obolibrary.org/obo/1234",
       "http://purl.obolibrary.org/obo/DOID_1234",
       "http://identifiers.org/DOID:1234"
-    ])).toEqual(["OBO:1234", "DOID:1234", undefined]);
+    ])).toEqual(["OBO:1234", "DOID:1234", "http://identifiers.org/DOID:1234"]);
   });
 
   test('from JSON-LD', async () => {
