@@ -601,7 +601,8 @@ impl Converter {
 
     /// Compresses a list of URIs to CURIEs
     pub fn compress_list(&self, uris: Vec<&str>, passthrough: bool) -> Vec<Option<String>> {
-        // TODO: fixed
+        // TODO: we might want to move passthrough to the converter builder (and use builder pattern to make it optional)
+        // So the user can choose if they want to use passthrough or not for non list functions too
         uris.into_iter()
             .map(|uri| match self.compress(uri) {
                 Ok(curie) => Some(curie),
