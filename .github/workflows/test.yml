@@ -16,7 +16,9 @@ jobs:
       - run: rustup update && cargo install cargo-deny
       - run: cargo fmt -- --check
       - run: cargo clippy --all --all-targets --all-features
-      - run: cargo deny check
+      # The devs behind cargo-deny seems completely lost with basic config setup...
+      # Probably better to completely get rid of it tbh https://github.com/EmbarkStudios/cargo-deny/issues/696
+      # - run: cargo deny check
 
   test-rust:
     name: 🧪 Test Rust

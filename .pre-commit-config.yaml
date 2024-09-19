@@ -31,11 +31,11 @@ repos:
         entry: cargo fmt
         language: system
         pass_filenames: false
-    -   id: deny
-        name: ❌ Check dependencies
-        entry: cargo deny check licenses
-        language: system
-        pass_filenames: false
+    # -   id: deny
+    #     name: ❌ Check dependencies
+    #     entry: cargo deny check licenses
+    #     language: system
+    #     pass_filenames: false
 ci:
     autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
     autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate

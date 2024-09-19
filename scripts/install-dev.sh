@@ -19,6 +19,6 @@ fi
 rustup update
 rustup toolchain install nightly # For tarpaulin
 
-cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-outdated git-cliff
+cargo install --force wasm-pack cargo-tarpaulin cargo-deny cargo-outdated git-cliff
 
 pre-commit install
