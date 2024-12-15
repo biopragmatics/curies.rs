@@ -122,8 +122,8 @@ Initialize a converter, then use it to `compress` URIs to CURIEs, or `expand` CU
         let curie = converter.compress("http://purl.obolibrary.org/obo/DOID_1234")?;
 
         // Compress/expand a list of URIs or CURIEs
-        let uris = converter.expand_list(vec!["doid:1234"]);
-        let curies = converter.compress_list(vec!["http://purl.obolibrary.org/obo/DOID_1234"]);
+        let uris = converter.expand_list(vec!["doid:1234"], true);
+        let curies = converter.compress_list(vec!["http://purl.obolibrary.org/obo/DOID_1234"], true);
 
         // Standardize prefix, CURIEs, and URIs using the preferred alternative
         assert_eq!(converter.standardize_prefix("gomf").unwrap(), "go");
